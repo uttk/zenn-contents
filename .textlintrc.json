@@ -1,0 +1,15 @@
+{
+  "rules": {
+    "preset-ja-technical-writing": {
+      "sentence-length": {
+        "max": 150
+      },
+      "no-doubled-joshi": false,
+      "ja-no-weak-phrase": false,
+      "ja-no-mixed-period": false,
+      "arabic-kanji-numbers": false,
+      "ja-no-successive-word": false,
+      "no-exclamation-question-mark": false
+    }
+  }
+}
