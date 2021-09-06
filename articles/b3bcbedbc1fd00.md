@@ -906,35 +906,47 @@ function Profile () {
 
 この制限に関する技術的な詳細が知りたい方は、こちらの[Discussion](https://github.com/vercel/swr/pull/357#issuecomment-627089889)を参照してください。
 
-# Next.js との連携
+# Next.js との連携(SSG/SSR 対応)
 
-Next.js では、SSR と SSG という強力な機能を使うことが出来ます。SWR はそれらの機能と**一緒に使うことが出来ます。**
+Next.js では、SSG と SSR という強力な機能を使うことが出来ます。SWR はそれらの機能と**一緒に使うことが出来ます。**
 
-具体的には以下のようにします。
+具体的には以下のようにします 👇
 
 ```ts:公式サイトより引用したものを少し改変
-export async function getStaticProps() {
-  // `getStaticProps` はサーバーサイドで呼び出されます,
-  // したがって、この`fetcher`関数はサーバー側で実行されます。
-  const posts = await fetcher('/api/posts')
-
-  return { props: { posts } } // <Posts />に渡す値を返す
+export async function getStaticProps () {
+  // `getStaticProps` はサーバー側で実行されます
+  const article = await getArticleFromAPI()
+  return {
+    props: {
+      fallback: {
+        '/api/article': article // '/api/article' の初期値を返す
+      }
+    }
+  }
 }
 
-function Posts (props) { // propsにはgetStaticPropsの返り値が入ります
+export default function Page({ fallback }) {
+  // getStaticProps()で受け取った初期値を反映する
+  return (
+    <SWRConfig value={{ fallback }}>
+      <Article />
+    </SWRConfig>
+  )
+}
 
-  // ここでは、`fetcher`関数がクライアント側で実行されます。
-  const { data } = useSWR('/api/posts', fetcher, { fallbackData: props.posts })
-
-  // ...
+function Article() {
+  // `data` の中には <SWRConfig /> で設定された初期値が渡される
+  const { data } = useSWR('/api/article', fetcher)
+  return <h1>{data.title}</h1>
 }
 ```
 
 これにより、初期レンダリングを早めつつ、それ以降の動作も SWR によって、動的に素早く動作させることが出来ます。
+また、個別に初期値を設定したい場合は、`fallbackData`を使うと便利です 👇
 
-:::message
-上記の `featcher` は、クライアントとサーバーの両方から実行されるため、両方の環境をサポートするか、別々の関数である必要があります。
-:::
+```ts:fallbackDataを使う例
+useSWR('/api/article', fetcher, { fallbackData: articleValue })
+```
 
 # キャッシュについて
 
