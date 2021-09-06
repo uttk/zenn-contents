@@ -1,0 +1,11 @@
+{
+  "name": "zenn-articles",
+  "version": "1.0.0",
+  "description": "zennに投稿する記事や本",
+  "author": "uttk <uttk8128@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "zenn-cli": "^0.1.95"
+  }
+}
