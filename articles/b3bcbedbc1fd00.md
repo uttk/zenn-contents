@@ -40,6 +40,7 @@ https://blog.jxck.io/entries/2016-04-16/stale-while-revalidate.html
 - 高速で軽量で再利用可能なデータフェッチ
 - リクエストの重複排除
 - リアクティブな動作の実現
+- SSR / SSG に対応
 - もちろん、Next.js 対応 🎊
 
 # 基本的な使い方
@@ -336,13 +337,13 @@ SWR では fetcher がエラーを発生した場合、fetcher を [exponential 
 ```ts:公式サイトより引用
 useSWR('/api/user', fetcher, {
   onErrorRetry: (error, key, config, revalidate, { retryCount }) => {
-    // Never retry on 404.
+    // 404では再試行しない。
     if (error.status === 404) return
-    // Never retry for a specific key.
+    // 特定のキーでは再試行しない。
     if (key === '/api/user') return
-    // Only retry up to 10 times.
+    // 再試行は10回までしかできません。
     if (retryCount >= 10) return
-    // Retry after 5 seconds.
+    // 5秒後に再試行します。
     setTimeout(() => revalidate({ retryCount: retryCount + 1 }), 5000)
   }
 })
@@ -685,7 +686,7 @@ useSWR("/api/user", fetecher, { revalidateOnMount: true });
 ```
 
 :::message
-デフォルトでは `initialData` オプションが設定されていない場合、**マウント時に再検証が行われます。**
+デフォルトでは `fallbackData` オプションが設定されていない場合、**マウント時に再検証が行われます。**
 :::
 
 ## 自動再検証を行いたくない場合
@@ -706,7 +707,7 @@ useSWR(key, fetcher, {
 })
 ```
 
-基本的には、`useSWR`と同じオプションや挙動をするので、`useSWR`の[糖衣構文](https://ja.wikipedia.org/wiki/糖衣構文)として使えます。
+基本的には、`useSWR`と同じオプションや挙動をするので、`useSWR()`の[糖衣構文](https://ja.wikipedia.org/wiki/糖衣構文)として使えます。
 
 # プリフェッチ(Prefetching)
 
@@ -815,7 +816,7 @@ Object.defineProperties(state, {
   error: {
     // `key` might be changed in the upcoming hook re-render,
     // but the previous state will stay
-    // so we need to match the latest key and data (fallback to `initialData`)
+    // so we need to match the latest key and data (fallback to `fallbackData`)
     get: function () {
       stateDependencies.current.error = true;
       return keyRef.current === key ? stateRef.current.error : initialError;
@@ -825,7 +826,7 @@ Object.defineProperties(state, {
   data: {
     get: function () {
       stateDependencies.current.data = true;
-      return keyRef.current === key ? stateRef.current.data : initialData;
+      return keyRef.current === key ? stateRef.current.data : fallbackData;
     },
     enumerable: true
   },
@@ -923,7 +924,7 @@ export async function getStaticProps() {
 function Posts (props) { // propsにはgetStaticPropsの返り値が入ります
 
   // ここでは、`fetcher`関数がクライアント側で実行されます。
-  const { data } = useSWR('/api/posts', fetcher, { initialData: props.posts })
+  const { data } = useSWR('/api/posts', fetcher, { fallbackData: props.posts })
 
   // ...
 }
@@ -1001,11 +1002,33 @@ const { data } = useSWR(key, fetcher, optoins);
 | ------- | ------------ | -------------------------------------------------------------------------------------------------- |
 | boolean | false        | [React Suspence モード](https://ja.reactjs.org/docs/concurrent-mode-suspense.html)を有効にします。 |
 
-## initialData
+## fetcher
+
+| 型        | デフォルト値 | 効果                                  |
+| --------- | ------------ | ------------------------------------- |
+| ※以下参照 | undefined    | デフォルトの`fetcher`関数を設定します |
+
+```ts:fetcherの型
+type Fetcher<Data> = (...args: any) => Data | Promise<Data>
+```
+
+## fallback
+
+| 型  | デフォルト値 | 効果                                |
+| --- | ------------ | ----------------------------------- |
+| any | undefined    | 初期データの key-value オブジェクト |
+
+## fallbackData
 
 | 型  | デフォルト値 | 効果               |
 | --- | ------------ | ------------------ |
 | any | undefined    | 初期値を設定します |
+
+## revalidateIfStale
+
+| 型      | デフォルト値 | 効果                                                   |
+| ------- | ------------ | ------------------------------------------------------ |
+| boolean | true         | 古いデータがある場合でも、マウント時に自動再検証をする |
 
 ## revalidateOnMount
 
@@ -1013,7 +1036,7 @@ const { data } = useSWR(key, fetcher, optoins);
 | ------- | ------------ | -------------------------------------------------- |
 | boolean | ※以下参照    | コンポーネントがマウントした時に自動的に再検証する |
 
-※ デフォルトでは `initialData` が**設定されてない場合**、マウント時に再検証されます。`false` だと `initialData` を設定していても、再検証されません。
+※ デフォルトでは `fallbackData` が**設定されてない場合**、マウント時に再検証されます。`false` だと `fallbackData` を設定していても、再検証されません。
 
 ## revalidateOnFocus
 
@@ -1028,8 +1051,6 @@ const { data } = useSWR(key, fetcher, optoins);
 | 型      | デフォルト値 | 効果                                                       |
 | ------- | ------------ | ---------------------------------------------------------- |
 | boolean | true         | ブラウザがネットワーク接続を回復した時に自動的に再検証する |
-
-※ `focusThrottleInterval` オプションで検証する期間を変更することが出来ます。
 
 ## refreshInterval
 
@@ -1186,6 +1207,19 @@ type isPaused = () => boolean
 詳細は以下のプルリクを参照してください 🏳‍🌈
 
 https://github.com/vercel/swr/pull/845
+
+## use
+
+| 型        | デフォルト値 | 効果                   |
+| --------- | ------------ | ---------------------- |
+| ※以下参照 | undefined    | ミドルウェア関数の配列 |
+
+```ts:useの型
+type Middleware = (useSWRNext: SWRHook) => SWRHookWithMiddleware
+
+type use = Middleware[]
+```
+
 :::
 
 # あとがき
