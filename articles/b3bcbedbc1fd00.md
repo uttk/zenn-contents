@@ -270,7 +270,7 @@ const UserList = () => {
 
 これで基本的な使い方の紹介は終了です ✨
 
-# グローバル設定(Global Configuration)
+# グローバル設定( Global Configuration )
 
 `useSWR()` の第三引数には、オプションを渡すことが出来ます。
 
@@ -310,6 +310,24 @@ function App () {
 :::message alert
 ただし `useSWR()` にオプションが渡されている場合は、そちらのオプションの方が優先されるので注意が必要です。
 :::
+
+## グローバル設定の取得
+
+`useSWRConfig()` を使うことで、グローバル設定を取得することができます。
+
+```ts:グローバル設定を取得する例
+import { useSWRConfig } from 'swr'
+
+const Component = () => {
+  // グローバル設定を取得する
+  const { refreshInterval, mutate, cache, ...restConfig } = useSWRConfig();
+
+  /* ... */
+}
+```
+
+基本的には、後述する `mutate()` や Cache Provider を取得するために使用することが多いと思います。
+また、ネストされた設定の場合は拡張(マージ)された設定値が返りますが、 `<SWRConfig />` を使っていない場合は、デフォルトの設定値を返します。
 
 # Global Error
 
