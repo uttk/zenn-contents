@@ -975,7 +975,7 @@ interface Cache<Data> {
 }
 ```
 
-また、上記の型を満たすものとして [JavaScript の Map](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Map) などがありますが、Map は Cache Provider として直接使用できます。
+上記の型を満たすものとして [JavaScript の Map](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Map) などがあります。
 
 ## Cache Provider の設定
 
