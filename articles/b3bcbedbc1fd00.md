@@ -710,7 +710,7 @@ useSWR("/api/user", fetecher, { revalidateOnMount: true });
 ## 自動再検証を行いたくない場合
 
 プロジェクトによっては、上記すべての再検証を行いたくない場合があります。
-そのような場合には、 `useSWRImmutable` を使うことで、すべての自動再検証を無効にできます 👇
+そのような場合には、 `useSWRImmutable()` を使うことで、すべての自動再検証を無効にできます 👇
 
 ```ts:自動再検証の無効化
 import useSWRImmutable from 'swr/immutable'
@@ -725,7 +725,7 @@ useSWR(key, fetcher, {
 })
 ```
 
-基本的には、`useSWR`と同じオプションや挙動をするので、`useSWR()`の[糖衣構文](https://ja.wikipedia.org/wiki/糖衣構文)として使えます。
+基本的には、`useSWR()`と同じオプションや挙動をするので、`useSWR()`の[糖衣構文](https://ja.wikipedia.org/wiki/糖衣構文)として使えます。
 
 # プリフェッチ(Prefetching)
 
@@ -924,7 +924,7 @@ function Profile () {
 
 この制限に関する技術的な詳細が知りたい方は、こちらの[Discussion](https://github.com/vercel/swr/pull/357#issuecomment-627089889)を参照してください。
 
-# Next.js との連携(SSG/SSR 対応)
+# Next.js との連携( SSG/SSR 対応 )
 
 Next.js では、SSG と SSR という強力な機能を使うことが出来ます。SWR はそれらの機能と**一緒に使うことが出来ます。**
 
