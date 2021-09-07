@@ -1006,6 +1006,72 @@ cache.subscribe(listener: () => void); // => () => void
 
 もしテスト以外でキャッシュを削除したい場合は、[Mutation](#mutation)などを使って対応しましょう。上記の `cache` オブジェクトは、**現状テスト以外で使うべきではありません。**
 
+# React Native について
+
+SWR は、[React Native](https://reactnative.dev/) でも使用することができます。
+基本的な使い方は同じですが、`focus` や `online` といった**ブラウザ特有のイベントを React Native 用に設定しなおす必要があります**👇
+
+```tsx:公式サイトより引用
+<SWRConfig
+  value={{
+    provider: () => new Map(),
+    isOnline() {
+      /* ネットワーク状態の検出器をカスタマイズ */
+      return true
+    },
+    isVisible() {
+      /* 視認状態の検出器をカスタマイズ */
+      return true
+    },
+    initFocus(callback) {
+      /* リスナーをステートプロバイダーに登録 */
+    },
+    initReconnect(callback) {
+      /* リスナーをステートプロバイダーに登録 */
+    }
+  }}
+>
+  <App />
+</SWRConfig>
+```
+
+`isOnline` と `isVisible` は、アプリが "アクティブ" かどうかを判断するための関数です。デフォルトでは、上記二つが "アクティブ" でない場合、 SWR は再検証を中止します。
+
+また、 `initFocus` と `initReconnect` を使用するには、前述した Custom Cache Provider も設定する必要があります。
+
+上記の設定について、`initFocus` の実装については、公式ドキュメントに具体例がありましたので、以下にソースコードを引用します 👇
+
+```tsx:公式サイトより引用
+<SWRConfig
+  value={{
+    provider: () => new Map(),
+    isVisible: () => { return true },
+    initFocus(callback) {
+      let appState = AppState.currentState
+
+      const onAppStateChange = (nextAppState) => {
+        /* バックグラウンドモードまたは非アクティブモードからアクティブモードに再開する場合 */
+        if (appState.match(/inactive|background/) && nextAppState === 'active') {
+          callback()
+        }
+        appState = nextAppState
+      }
+
+      // アプリの状態変更を監視する
+      const subscription = AppState.addEventListener('change', onAppStateChange)
+
+      return () => {
+        subscription.remove()
+      }
+    }
+  }}
+>
+  <App>
+</SWRConfig>
+```
+
+上記のソースコードにより、React Native でもアクティブモードへ移行した時に、フォーカス時の再検証( Revalidate on Focus )が実行されるようになります。
+
 # オプションについて
 
 `useSWR`にはオプションを渡すことができます。
