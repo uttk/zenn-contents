@@ -960,51 +960,73 @@ useSWR('/api/article', fetcher, { fallbackData: articleValue })
 
 # キャッシュについて
 
-SWR にはキャッシュがあるのは既にご存知だと思いますが、そのキャッシュ自体を操作することができます。
-
-:::message alert
-キャッシュを操作する処理は、複雑なバグを引き起こす可能性があります。そのため、テストの環境などの限られた場面で使う事をオススメします。具体的な事は、以下のプルリクを参照してください。
-
-参照: https://github.com/vercel/swr/pull/231
+:::message
+**キャッシュを扱う際には注意して扱ってください！**
+基本的にキャッシュを扱うような処理は、複雑なバグを引き起こす原因になります。
 :::
 
-具体的なソースコードは以下のようになります。
+SWR では、Cache Provider を使用してキャッシュの処理をカスタマイズすることができますが、Cache Provider として使用するには、以下の型を満たすようなオブジェクトである必要があります 👇
 
-```ts
-import  { cache } from "swr";
-
-type keyType = string | any[] | null;
-type keyFunction = () => keyType;
-type keyInterface = keyFunction | keyType;
-
-// キャッシュをクリア
-cache.clear(); // => void;
-
-// キャッシュを削除
-cache.delete(key: keyInterface) // => void;
-
-// キャッシュを取得
-cache.get(key: keyInterface); // => any;
-
-// キャッシュが存在しているか
-cache.has(key: keyInterface); // => boolean;
-
-// キャッシュのキー配列を取得
-cache.keys(); // => string[];
-
-// シリアライズキーを取得
-cache.serializeKey(key: keyInterface); // => [string, any, string, string]
-
-// キャッシュをセットします
-cache.set(key: keyInterface, value: any); // => any
-
-// キャッシュの変更を監視します
-cache.subscribe(listener: () => void); // => () => void
+```ts:公式サイトより引用
+interface Cache<Data> {
+  get(key: string): Data | undefined
+  set(key: string, value: Data): void
+  delete(key: string): void
+}
 ```
 
-## テスト以外でキャッシュを削除したい場合
+また、上記の型を満たすものとして [JavaScript の Map](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Map) などがありますが、Map は Cache Provider として直接使用できます。
 
-もしテスト以外でキャッシュを削除したい場合は、[Mutation](#mutation)などを使って対応しましょう。上記の `cache` オブジェクトは、**現状テスト以外で使うべきではありません。**
+## Cache Provider の設定
+
+Cache Provider を設定するには、`<SWRConfig />` を使用します。
+
+```tsx:公式サイトより引用
+import useSWR, { SWRConfig } from 'swr'
+
+function App() {
+  return (
+    <SWRConfig value={{ provider: () => new Map() }}>
+      <Page/>
+    </SWRConfig>
+  )
+}
+```
+
+またこの時、 `provider` に渡す関数の第一引数には、親のコンポーネントの Cache Provider ( 無い場合はデフォルトのキャッシュ )を受け取る事ができるため、それを使って拡張する事もできます 👇
+
+```tsx:公式サイトより引用
+<SWRConfig value={{ provider: (cache) => newCache }}>
+  ...
+</SWRConfig>
+```
+
+:::message
+この機能は実験的なモノであり、将来のアップグレードで動作が変更される可能性がある事に注意してください！
+:::
+
+## Cache Provider の取得
+
+カスタマイズした Cache Provider は、`useSWRConfig()` で取得することができます 👇
+
+```tsx:カスタマイズしたcacheを取得する
+import { useSWRConfig } from 'swr'
+
+const Component = () => {
+  const { cache } = useSWRConfig()
+
+  const value = cache.get("/api/users") // "/api/users"のキャッシュを取得する
+  const onClear = () => cache.clear()   // すべてのキャッシュを削除
+
+  // ...
+}
+```
+
+## 具体的な処理について
+
+公式サイトにいくつかの具体例がありますので、そちらを参考にして頂けたらと思います 👇
+
+https://swr.vercel.app/ja/docs/advanced/cache#例
 
 # React Native について
 
@@ -1037,7 +1059,7 @@ SWR は、[React Native](https://reactnative.dev/) でも使用することが�
 
 `isOnline` と `isVisible` は、アプリが "アクティブ" かどうかを判断するための関数です。デフォルトでは、上記二つが "アクティブ" でない場合、 SWR は再検証を中止します。
 
-また、 `initFocus` と `initReconnect` を使用するには、前述した Custom Cache Provider も設定する必要があります。
+また、 `initFocus` と `initReconnect` を使用するには、前述した Cache Provider も設定する必要があります。
 
 上記の設定について、`initFocus` の実装については、公式ドキュメントに具体例がありましたので、以下にソースコードを引用します 👇
 
