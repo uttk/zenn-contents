@@ -827,38 +827,27 @@ Dependency Collection について解説したいと思いますが、**これ�
 上記の内容では、`useSWR()` から**受け取る値を変更するだけで、コンポーネントの描画更新が変化しています。**
 なぜこのような事が起こるのかと言うと、SWR 側が値を取得しているかを検知して、最適な描画更新をしているためです。具体的には以下のソースコードです。
 
-※ [公式リポジトリのソースコード](https://github.com/vercel/swr/blob/d960d0f914cc3bb34d4e5712dce3ee58d8263db0/src/use-swr.ts#L663-L685)より引用。
+※ [公式リポジトリのソースコード](https://github.com/vercel/swr/blob/e3d42488d7457019f5f9ca3b6e03357c8dd33130/src/use-swr.ts#L475-L489)より引用。
 
 ```ts:swrのソースコードから抜粋
-Object.defineProperties(state, {
-  error: {
-    // `key` might be changed in the upcoming hook re-render,
-    // but the previous state will stay
-    // so we need to match the latest key and data (fallback to `fallbackData`)
-    get: function () {
-      stateDependencies.current.error = true;
-      return keyRef.current === key ? stateRef.current.error : initialError;
-    },
-    enumerable: true
+return {
+  mutate: boundMutate,
+  get data() {
+    stateDependencies.data = true
+    return data
   },
-  data: {
-    get: function () {
-      stateDependencies.current.data = true;
-      return keyRef.current === key ? stateRef.current.data : fallbackData;
-    },
-    enumerable: true
+  get error() {
+    stateDependencies.error = true
+    return error
   },
-  isValidating: {
-    get: function () {
-      stateDependencies.current.isValidating = true;
-      return key ? stateRef.current.isValidating : false;
-    },
-    enumerable: true
+  get isValidating() {
+    stateDependencies.isValidating = true
+    return isValidating
   }
-});
+} as SWRResponse<Data, Error>
 ```
 
-上記のソースコードは、[getter](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Functions/get) を利用して値が使われているかを検知して、それぞれを **ステートフルな値** として扱っています。
+上記のソースコードは、[getter](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Functions/get) を利用して、値が使われているかを検知して、それぞれを **ステートフルな値** として扱っています。
 
 仕組みは意外と簡単なのですが、初見時にちょっと驚いたのは内緒です 🤫
 
