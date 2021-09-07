@@ -371,12 +371,12 @@ useSWR('/api/user', fetcher, {
 
 # Mutation
 
-SWR で Mutation を使う方法は、筆者が考えるに 4 通りあります。
-この節では、その方法とその方法に対する筆者の知見を紹介したいと思います。
+SWR で、GET 以外の POST や DELETE といった処理には Mutation を使うことで対応できます。
+Mutation を使う方法は、筆者が考えるに 4 通りありますので、この節では、その方法とその方法に対する筆者の知見を紹介したいと思います。
 
 ※ 方法の名前は分かりやすいさの為に、一部勝手に付けています。ご了承ください。
 
-## 方法その１(Bound Mutate)
+## 方法その１( Bound Mutate )
 
 **Bound Mutate は、一番オススメの方法です。**
 先ずは、ソースコードを見てみましょう。
@@ -401,14 +401,15 @@ const DisplayCatName = () => {
 
 悪い所を上げるとするならば、`useSWR()` を実行する必要があるため、他のコンポーネントとの連携がやりにくいという欠点があります。しかし、それを補う機能が SWR にはありますので、そこまで気にする必要はありません！
 
-## 方法その２(Refetch Mutation)
+## 方法その２( Refetch Mutation )
 
 Refetch Mutation は、名前が示す通り refetch(再取得)によってデータの整合性を保つ方法です。ソースコードを見てみましょう。
 
 ```ts:RefetchMutationのソースコード
-import useSWR, { mutate } from "swr";
+import useSWR, { useSWRConfig } from "swr";
 
 const DisplayCatName = () => {
+  const { mutate } = useSWRConfig();
   const { data: cat } = useSWR("/cat", fetcher);
 
   const onUpdateCatName = async (catName: string) => {
@@ -424,7 +425,7 @@ const DisplayCatName = () => {
 }
 ```
 
-Bound Mutate と違う所は、mutate 関数をインポートから引っ張って来ている事と、実行時にキー文字列( 今回は "/cat" )だけを渡す必要があるという事です。
+Bound Mutate と違う所は、 `mutate` 関数を `useSWRConfig()` から取得していることと、実行時にキー文字列( 今回は "/cat" )だけを渡す必要があるという事です。
 
 このように実行する事によって、SWR に refetch(再取得)を実行するように指示することが出来ます。**これによって、サーバーとの間でデータの整合性を保つことが出来ます！** サーバーとの同期が多く必要なサービスや、サーバー上で複雑な処理をしている場合は、重宝する方法ですね。
 
@@ -434,13 +435,13 @@ Bound Mutate と違う所は、mutate 関数をインポートから引っ張っ
 ソースコード内のコメントにも書いてありますが、useSWR()の第一引数に配列を渡している場合は、mutate()でも同じ値を持った配列を渡す必要があります。
 :::
 
-## 方法その３(Update Local Mutate)
+## 方法その３( Update Local Mutate )
 
 Update Local Mutate は、Refetch Mutation とほとんど同じような使い方です。
 ソースコードを見てみましょう。
 
 ```ts:UpdateLocalMutateのソースコード
-import useSWR, { mutate } from "swr";
+import useSWR, { useSWRConfig } from "swr";
 
 interface Cat {
   id: number;
@@ -448,6 +449,7 @@ interface Cat {
 }
 
 const DisplayCatName = () => {
+  const { mutate } = useSWRConfig();
   const { data: cat } = useSWR<Cat>("/cat", fetcher);
 
   const onUpdateCatName = async (catName: string) => {
@@ -472,13 +474,13 @@ const DisplayCatName = () => {
 
 ただ注意としては、使いすぎると複雑なバグを引き起こしかねないので、Bound Mutate が使える場合は、そちらを使った方が良いと思います 🤔 ※ Boud Muatate だと範囲を限定できるので、バグを限定的にすることが出来ます。
 
-## 方法その４(Mutate Based on Current Data)
+## 方法その４( Mutate Based on Current Data )
 
 最後に Mutate Based on Current Data を紹介します。
 ソースコードを見てみましょう。
 
 ```ts:MutateBasedOnCurrentDataのソースコード
-import useSWR, { mutate } from "swr";
+import useSWR, { useSWRConfig } from "swr";
 
 interface Cat {
   id: number;
@@ -486,6 +488,7 @@ interface Cat {
 }
 
 const DisplayCatName = () => {
+  const { mutate } = useSWRConfig();
   const onUpdateCatName = async (catName: string) => {
     mutate("/cat", async (cat: Cat): Promise<Cat> => {
       const newCat = { ...cat, name: catName };
@@ -500,7 +503,7 @@ const DisplayCatName = () => {
 }
 ```
 
-こちらも Refetch Mutation や Update Local Mutate と同じような使い方ですが、`muatate()` の第二引数に非同期関数(async function)を渡している点が違います。引数に渡した非同期関数は、 `useSWR()` が持っているキャッシュを受け取り、次のキャッシュの値を返します。
+こちらも Refetch Mutation や Update Local Mutate と同じような使い方ですが、`mutate()` の第二引数に非同期関数( async function )を渡している点が違います。引数に渡した非同期関数は、 `useSWR()` が持っているキャッシュを受け取り、次のキャッシュの値を返します。
 
 この方法は、現在取得しているデータを用いた変更処理を行う時に大変便利な方法です。これによって、わざわざ `useSWR()` を実行して値を取得する必要がありませんので、コンポーネントの描画を抑えることが出来ますし、他の方法では出来ない複雑な処理を実行する事も可能となっています。
 
