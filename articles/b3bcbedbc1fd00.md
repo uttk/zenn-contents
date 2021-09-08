@@ -42,6 +42,7 @@ https://blog.jxck.io/entries/2016-04-16/stale-while-revalidate.html
 - リアクティブな動作の実現
 - SSR / SSG に対応
 - もちろん、Next.js 対応 🎊
+- React Native でも使える 🎐
 
 # 基本的な使い方
 
@@ -545,9 +546,9 @@ function App () {
 
 `useSWR()` は、一度取得したデータをキャシュとして保持するので、一回取得してしまえば後は高速に動作します。これがとてもシンプルな実装でできるのはとても良いですよね ✨
 
-しかし、無限ローディングなどの終わりのないページネーションや取得したデータ全体を扱いたい場合は、上記の方法では少し面倒な実装になってしまいます。そこで、SWR 側が `useSWRInfinite` という Hooks を用意してくれています！やったね！
+しかし、無限ローディングなどの終わりのないページネーションや取得したデータ全体を扱いたい場合は、上記の方法では少し面倒な実装になってしまいます。そこで、SWR 側が `useSWRInfinite()` という Hooks を用意してくれています！やったね！
 
-`useSWRInfinite` を使う事で、簡単に無限ローディングなど実装することができます。
+`useSWRInfinite()` を使う事で、簡単に無限ローディングなど実装することができます。
 
 ```ts:公式サイトより引用したものを少し改変
 // 各ページのSWRキーを取得する関数
@@ -958,6 +959,98 @@ function Article() {
 useSWR('/api/article', fetcher, { fallbackData: articleValue })
 ```
 
+# Middleware について
+
+:::message
+Middleware を多用すると処理が複雑化してバグを発生させやすいため、使用を控えることをオススメします。
+:::
+
+SWR では、デフォルトの挙動を拡張できる Middleware を設定できます。
+具体的には以下のような関数です 👇
+
+```ts:公式サイトより引用
+function myMiddleware (useSWRNext) {
+  return (key, fetcher, config) => {
+    // フックが実行される前...
+
+    // 次のミドルウェア、またはこれが最後のミドルウェアの場合は `useSWR` を処理します。
+    const swr = useSWRNext(key, fetcher, config)
+
+    // フックが実行された後...
+    return swr
+  }
+}
+```
+
+上記の関数を `use` オプションに渡すことで、`useSWR()` の挙動を拡張できます 👇
+
+```tsx:公式サイトから引用したモノを少し改変
+<SWRConfig value={{ use: [myMiddleware] }}>
+  {/* ... */}
+</SWRConfig>
+
+// または...
+
+useSWR(key, fetcher, { use: [myMiddleware] })
+```
+
+注意点として、 Middleware は実行順に継承されていくため、以下の二つの処理は同じになります 👇
+
+```tsx:公式サイトより引用
+function Bar () {
+  useSWR(key, fetcher, { use: [c] })
+  // ...
+}
+
+function Foo() {
+  return (
+    <SWRConfig value={{ use: [a] }}>
+      <SWRConfig value={{ use: [b] }}>
+        <Bar/>
+      </SWRConfig>
+    </SWRConfig>
+  )
+}
+```
+
+```ts:公式サイトより引用
+useSWR(key, fetcher, { use: [a, b, c] })
+```
+
+## 実行順について
+
+Middleware の理解を深めるために、実際に Middleware の実行順を確認していきましょう。
+まずは、以下のような処理を書いたとします 👇
+
+```ts:公式サイトより引用
+useSWR(key, fetcher, { use: [a, b, c] })
+```
+
+この時の実行順は、以下のようになります 👇
+
+```ts:公式サイトより引用
+enter a
+  enter b
+    enter c
+      useSWR()
+    exit  c
+  exit  b
+exit  a
+```
+
+上記から分かるように、`a → b → c → useSWR()` の順で実行されています。
+これはつまり、もし `a` の部分にバグがあり処理が中断した場合は、それ以降の `b → c → useSWR()` は実行されないことを意味します。そのため、**Middleware の順番は重要**であり、**Middleware のバグは大きなバグに繋がりやすい**ことを理解しておく必要があります。
+
+## 具体例について
+
+一番身近な具体例として、上記で解説した `useSWRInfinite()` が挙げられます 👇
+
+https://github.com/vercel/swr/blob/ec778e70c8e17c239f2837c14dea99ce9a429fb0/infinite/index.ts
+
+また、公式ドキュメントには他の Middleware の実装例も紹介されていますので、Middleware を自作する際の参考にするといいと思います 👇
+
+https://swr.vercel.app/ja/docs/middleware#%E4%BE%8B
+
 # キャッシュについて
 
 :::message
@@ -975,7 +1068,7 @@ interface Cache<Data> {
 }
 ```
 
-上記の型を満たすものとして [JavaScript の Map](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Map) などがあります。
+※ 上記の型を満たすものとして [JavaScript の Map](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Map) などがあります。
 
 ## Cache Provider の設定
 
@@ -1028,7 +1121,7 @@ const Component = () => {
 
 https://swr.vercel.app/ja/docs/advanced/cache#例
 
-# React Native について
+# React Native への対応
 
 SWR は、[React Native](https://reactnative.dev/) でも使用することができます。
 基本的な使い方は同じですが、`focus` や `online` といった**ブラウザ特有のイベントを React Native 用に設定しなおす必要があります**👇
