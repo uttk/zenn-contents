@@ -6,12 +6,6 @@ topics: ["react", "typescript", "swr"]
 published: true
 ---
 
-:::message
-先日、[SWR 1.0 がリリースされました](https://swr.vercel.app/blog/swr-v1)🎉
-**それに伴い、この記事の内容も古くなっている事に注意してください！**
-※ 現在、アップデートに対応した情報にするために加筆＆修正中です！
-:::
-
 # この記事について
 
 [SWR](https://swr.vercel.app/)について色々と学んだので、その知見をここで共有したいと思います 💪
