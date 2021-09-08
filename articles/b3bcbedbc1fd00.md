@@ -8,19 +8,19 @@ published: true
 
 # この記事について
 
-[SWR](https://swr.vercel.app/)について色々と学んだので、その知見をここで共有したいと思います 💪
+SWR について色々と学んだので、その知見をここで共有したいと思います 💪
 
 ※ 基本的に以下の公式サイトの情報を参考にしています 📖
 
 https://swr.vercel.app/
 
-そのため、この記事で出すサンプルコードなどは主に上記の公式サイトから引用させて貰っています。予めご了承ください 🙏
+そのため、この記事で出すサンプルコードなどは主に上記の公式サイトから引用させてもらっています。予めご了承ください 🙏
 
 # SWR とは何か？
 
-[SWR](https://swr.vercel.app/)は、Next.js を作っている[Vercel 社](https://vercel.com/about)が開発しているデータフェッチのための[React Hooks](https://ja.reactjs.org/docs/hooks-intro.html)ライブラリです。"SWR"と言う名前は、`stale-while-revalidate`の頭文字をとって名付けられています。そのため、SWR は`stale-while-revalidate`に基づいた処理と設計になっています。
+SWR は、Next.js を作っている[Vercel 社](https://vercel.com/about)が開発しているデータフェッチのための [React Hooks](https://ja.reactjs.org/docs/hooks-intro.html) ライブラリです。"SWR"と言う名前は、 `stale-while-revalidate` の頭文字をとって名付けられています。そのため、SWR は`stale-while-revalidate`に基づいた処理と設計になっています。
 
-`stale-while-revalidate`について解説したい所ですが、解説するとすごく長くなってしまうため、ここでは「 **キャッシュをなるべく最新に保つ機能** 」という簡単なまとめ方で留めたいと思います。より知りたい方は RFC か以下のサイトが参考になります。
+`stale-while-revalidate`について解説したい所ですが、解説するとすごく長くなってしまうため、ここでは「 **キャッシュをなるべく最新に保つ機能** 」という簡単なまとめ方で留めたいと思います。より知りたい方は RFC か以下のサイトが参考になります 👇
 
 https://tools.ietf.org/html/rfc5861
 
