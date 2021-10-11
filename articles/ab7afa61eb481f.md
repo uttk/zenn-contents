@@ -8,7 +8,7 @@ published: true
 
 # この記事について
 
-webpackの設定ファイルである`webpack.config.js`は、TypeScriptで書いてNode.js上で実行できます。しかし、**本来であればTypeScriptのソースコードはNode.jsでは実行できないはずです。** この事が気になった私は、今回その仕組みを調べてみたので、この場を借りてその調査結果を共有したいと思います💪
+webpack の設定ファイルである`webpack.config.js`は、TypeScript で書いて Node.js 上で実行できます。しかし、**本来であれば TypeScript のソースコードは Node.js では実行できないはずです。** この事が気になった私は、今回その仕組みを調べてみたので、この場を借りてその調査結果を共有したいと思います 💪
 
 **参照**
 
@@ -16,16 +16,15 @@ https://webpack.js.org/configuration/configuration-languages/
 
 # 記事の概要
 
-概要のみ知りたい人に向けて、以下にこの記事で解説する内容をまとめておきます👇
+概要のみ知りたい人に向けて、以下にこの記事で解説する内容をまとめておきます 👇
 
 - [webpack-cli](https://github.com/webpack/webpack-cli) では、 [rechoir](https://github.com/gulpjs/rechoir) を使って TypeScript を `require()` できるようにしているよ
 - [rechoir](https://github.com/gulpjs/rechoir) は、 [ts-node](https://github.com/TypeStrong/ts-node) などを使って [require.extensions](https://nodejs.org/api/modules.html#modules_require_extensions) を拡張しているよ
 - ちなみに、 [require.extensions](https://nodejs.org/api/modules.html#modules_require_extensions) は非推奨だよ
-- webpack-cliが対応している言語は、 [node-interpret](https://github.com/gulpjs/interpret) から確認できるよ
+- webpack-cli が対応している言語は、 [node-interpret](https://github.com/gulpjs/interpret) から確認できるよ
 - この記事の後半では、 [require.extensions](https://nodejs.org/api/modules.html#modules_require_extensions) を使って [YAML](https://ja.wikipedia.org/wiki/YAML) を `require()` できるようにするよ
 
-
-# webpack-cliの実装を見る
+# webpack-cli の実装を見る
 
 まずは、[webpack-cli](https://github.com/webpack/webpack-cli)の実装を見てみましょう。
 以下に、[設定ファイルを読み込む部分のソースコード](https://github.com/webpack/webpack-cli/blob/dbecc6750e3cd5ece92163545481ba3f608c48d0/packages/webpack-cli/lib/webpack-cli.js#L1504-L1550)を引用します。
@@ -89,7 +88,7 @@ const loadConfig = async (configPath) => {
 
 「 2. 設定ファイルのロード処理 」の方は、ファイルパスや拡張子を見て`require()`や`import()`を実行するだけなので、この記事では「1. 設定ファイルの前処理」のみ解説します。
 
-以下に、そのソースコードを抜粋します👇
+以下に、そのソースコードを抜粋します 👇
 
 ```js:上記のソースコードから抜粋
 const { interpret } = this.utils;
@@ -121,7 +120,7 @@ if (interpreted) {
 }
 ```
 
-まずは一行目を見てみましょう👀
+まずは一行目を見てみましょう 👀
 
 ```js
 const { interpret } = this.utils;
@@ -129,10 +128,10 @@ const { interpret } = this.utils;
 
 いきなり良く分からないモノが出てきましたが、これは [interpret](https://github.com/gulpjs/interpret) というライブラリになります。
 
-このライブラリは、ファイル拡張子とそれに紐づいているローダーの情報を持ったオブジェクトを提供します。例えば、TypeScriptの場合は、
+このライブラリは、ファイル拡張子とそれに紐づいているローダーの情報を持ったオブジェクトを提供します。例えば、TypeScript の場合は、
 
 ```js:interpretのソースコードから抜粋
-{  
+{
   '.ts': [
     'ts-node/register',
     'typescript-node/register',
@@ -148,16 +147,16 @@ const { interpret } = this.utils;
           ignore: [ignoreNonBabelAndNodeModules],
         });
       },
-    },    
+    },
   ],
-} 
-``` 
+}
+```
 
 といった具合です。
 
-2行目以降の部分では設定ファイル( `webpack.config.*` )の拡張子を取得して、 その拡張子が [interpret](https://github.com/gulpjs/interpret) に定義されているかを判定しています。[^1]
+2 行目以降の部分では設定ファイル( `webpack.config.*` )の拡張子を取得して、 その拡張子が [interpret](https://github.com/gulpjs/interpret) に定義されているかを判定しています。[^1]
 
-[^1]: 具体的な情報は、[interpretのソースコード](https://github.com/gulpjs/interpret/blob/master/index.js)を参照してください
+[^1]: 具体的な情報は、[interpret のソースコード](https://github.com/gulpjs/interpret/blob/master/index.js)を参照してください
 
 ```js:interpretが設定ファイルの拡張子に対応しているかを判定している
 const ext = path.extname(configPath);
@@ -167,7 +166,7 @@ const interpreted = Object.keys(interpret.jsVariants).find(
 ```
 
 そして、拡張子が対応しているモノであれば ローダー情報を使って処理をしています。
-以下の部分です👇
+以下の部分です 👇
 
 ```js:interpretのローダー情報を使って処理している部分
 if (interpreted) {
@@ -198,26 +197,25 @@ if (interpreted) {
 
 と言う流れになります。
 
-これで、「 webpackの設定ファイルがなぜTypeScriptで書けるのか？ 」という謎は解決しました！
+これで、「 webpack の設定ファイルがなぜ TypeScript で書けるのか？ 」という謎は解決しました！
 
-しかし、その謎を解決している`require.extensions`について解説していませんので、次の節でその詳細を見て行きましょう👉
+しかし、その謎を解決している`require.extensions`について解説していませんので、次の節でその詳細を見て行きましょう 👉
 
+# require.extensions とは何か？
 
-# require.extensionsとは何か？
+`require.extensions`は、特定の拡張子の処理方法を定義するためのモノです。この API を用いることで、通常では対応していない拡張子のファイルを Node.js 上で`require()`することができます。
 
-`require.extensions`は、特定の拡張子の処理方法を定義するためのモノです。このAPIを用いることで、通常では対応していない拡張子のファイルをNode.js上で`require()`することができます。
-
-今回の場合のように、TypeScriptのソースコードを`require()`したい場合は、[ts-node](https://github.com/TypeStrong/ts-node) などのライブラリを使うことで簡単に実現できるようになります👇
+今回の場合のように、TypeScript のソースコードを`require()`したい場合は、[ts-node](https://github.com/TypeStrong/ts-node) などのライブラリを使うことで簡単に実現できるようになります 👇
 
 ```js:.tsファイルをrequrie()できるようにする
 require('ts-node/register');
 
 // TypeScriptで書かれた設定情報を読み込む
-const config = require('./config.ts'); 
+const config = require('./config.ts');
 ```
 
-結構便利なAPIですが、実はこれは**非推奨**となっています。
-理由が、[Node.jsのドキュメント](https://nodejs.org/api/modules.html#modules_require_extensions)に書いてありましたので引用させてもらいます。
+結構便利な API ですが、実はこれは**非推奨**となっています。
+理由が、[Node.js のドキュメント](https://nodejs.org/api/modules.html#modules_require_extensions)に書いてありましたので引用させてもらいます。
 
 :::message alert
 **Deprecated.** In the past, this list has been used to load non-JavaScript modules into Node.js by compiling them on-demand. However, in practice, there are much better ways to do this, such as loading modules via some other Node.js program, or compiling them to JavaScript ahead of time.
@@ -229,11 +227,11 @@ const config = require('./config.ts');
 
 とのことです。まあ、わざわざランタイム上でコンパイルするなら、実行前にコンパイルしたほうが良いですよね。
 
-公式が非推奨にしているモノなので、あまり多用しない方が良いと思いますが、こんな便利なAPIを知ったら、これを使って遊んでみたくなるのがプログラマーの性ってヤツですよね！
+公式が非推奨にしているモノなので、あまり多用しない方が良いと思いますが、こんな便利な API を知ったら、これを使って遊んでみたくなるのがプログラマーの性ってヤツですよね！
 
 ということで、`require.extensions`を使って`.yaml`ファイルを`require()`できるようにしたいと思います！
 
-# `.yaml`ファイルをrequire()できるようにする
+# `.yaml`ファイルを`require()`できるようにする
 
 まず必要なモジュールをインストールします。
 
@@ -241,7 +239,7 @@ const config = require('./config.ts');
 $> npm i --save yaml
 ```
 
-そしたら次に、`require.extensions`の処理を書いていきます🖊
+そしたら次に、`require.extensions`の処理を書いていきます 🖊
 
 ```js:./yaml-setup.js
 const fs = require("fs")
@@ -276,7 +274,7 @@ $> node -r ./yaml-setup.js ./index.js
 出力結果: { Hello: [ 'World' ] }
 ```
 
-無事、`.yaml`ファイルの読み込みに成功しました🎉
+無事、`.yaml`ファイルの読み込みに成功しました 🎉
 
 ### `-r`オプションを使わない場合
 
@@ -296,7 +294,6 @@ $> node ./index.js
 出力結果: { Hello: [ 'World' ] }
 ```
 
-
 # 参考リンク
 
 https://qiita.com/erukiti/items/33fdf0170bbbb85c0f6c
@@ -305,17 +302,16 @@ https://nodejs.org/api/modules.html#modules_require_extensions
 
 https://www.programmersought.com/article/50905381715/
 
-
 # あとがき
 
-ここまで読んでくれてありがとうございます🙏
+ここまで読んでくれてありがとうございます 🙏
 
-「 webpackの設定ファイルって、TypeScriptで書けるのにNode.jsで実行できるのはなんでだろう🤔 」という疑問から調べてみましたが、想像とは違った形で実装されていて少し驚きました。
+「 webpack の設定ファイルって、TypeScript で書けるのに Node.js で実行できるのはなんでだろう 🤔 」という疑問から調べてみましたが、想像とは違った形で実装されていて少し驚きました。
 
-Module Hackの事や、なんとなく使っていた`-r`オプションの意味を理解できたり、色々なライブラリの事を知れたりと、小さな気づきから色々な事が学べる良い機会だったと思います。
+Module Hack の事や、なんとなく使っていた`-r`オプションの意味を理解できたり、色々なライブラリの事を知れたりと、小さな気づきから色々な事が学べる良い機会だったと思います。
 
 みなさんも小さな気づきがあれば、調べてみると案外面白いことが分かるかもしれませんよ？
 
 記事に間違いなどがあれば、コメントなどで教えて頂けると嬉しいです。
 これが誰かの参考になれば幸いです。
-それではまた👋
+それではまた 👋

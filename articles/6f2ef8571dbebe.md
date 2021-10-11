@@ -8,10 +8,10 @@ published: true
 
 # この記事について
 
-[NestJS](https://nestjs.com/)でステージング環境を作っていきます💪
+[NestJS](https://nestjs.com/)でステージング環境を作っていきます 💪
 
 :::message
-NestJSのひな型が既に作成されている事を想定しています
+NestJS のひな型が既に作成されている事を想定しています
 :::
 
 # 必要なモジュールをインストール
@@ -20,7 +20,7 @@ NestJSのひな型が既に作成されている事を想定しています
 $ npm i --save @nestjs/config cross-env
 ```
 
-yarnを使っている場合は、以下のようになります。
+yarn を使っている場合は、以下のようになります。
 
 ```shell
 $ yarn add @nestjs/config cross-env
@@ -39,7 +39,7 @@ https://zenn.dev/uttk/scraps/5169d2bb2e3d767533f3#comment-65d278330ab6d7a86627
 参考: https://github.com/kentcdodds/cross-env/issues/257
 :::
 
-# AppModuleにConfigModuleをインポートする
+# AppModule に ConfigModule をインポートする
 
 [@nestjs/config](https://docs.nestjs.com/techniques/configuration) を使うには、以下のように修正します。
 
@@ -52,7 +52,7 @@ import { ConfigModule } from '@nestjs/config';
     ConfigModule.forRoot({
        // 他のクラスで、ConfigServiceを使えるようにする
       isGlobal: true,
-      
+
       // ロードするenvファイルを指定する
       envFilePath: `.env.${process.env.NODE_ENV}`,
 
@@ -69,9 +69,9 @@ export class AppModule {}
 
 `envFilePath`の部分で、`process.env.NODE_ENV`の値によって読み込むファイルを変更しています。これによって、ステージングが出来るようになります。
 
-# npm scriptsを定義する
+# npm scripts を定義する
 
-`nest`コマンドでひな型を生成した場合、`npm scripts`は以下のように定義されています。(※2020年12月現在)
+`nest`コマンドでひな型を生成した場合、`npm scripts`は以下のように定義されています。(※2020 年 12 月現在)
 
 ```json:package.json
 "scripts": {
@@ -111,7 +111,7 @@ export class AppModule {}
 },
 ```
 
-# envファイルを定義
+# env ファイルを定義
 
 ここまで出来たら、あとは`env`ファイルを定義するだけです。
 
@@ -128,15 +128,15 @@ export class AppModule {}
 FILE_NAME=".env"
 ```
 
-### NODE_ENV=developmentの時に読み込まれるファイル
+### NODE_ENV=development の時に読み込まれるファイル
 
-development環境の時に使いたい変数を定義します。
+development 環境の時に使いたい変数を定義します。
 
 ```env:.env.development(サンプル)
 FILE_NAME=".env.development"
 ```
 
-**対応するnpm scripts**
+**対応する npm scripts**
 
 ```shell
 $ npm run start
@@ -144,15 +144,15 @@ $ npm run start:dev
 $ npm run start:debug
 ```
 
-### NODE_ENV=productionの時に読み込まれるファイル
+### NODE_ENV=production の時に読み込まれるファイル
 
-production環境の時に使いたい変数を定義します。
+production 環境の時に使いたい変数を定義します。
 
 ```env:.env.production(サンプル)
 FILE_NAME=".env.production"
 ```
 
-**対応するnpm scripts**
+**対応する npm scripts**
 
 ```shell
 $ npm run start:prod
@@ -160,4 +160,4 @@ $ npm run start:prod
 
 # 終わり
 
-以上で環境構築は終わりです。お疲れ様でした🙌
+以上で環境構築は終わりです。お疲れ様でした 🙌
