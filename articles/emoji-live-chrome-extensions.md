@@ -336,7 +336,7 @@ module.exports = {
 
 ![作った拡張機能をインストールしている画像](/images/chrome-extension-article/chrome-extension-install.png)
 
-インストールが完了が完了して、以下のように拡張機能が表示されていれば大丈夫です 👌
+インストールが完了して、以下のように拡張機能が表示されていれば大丈夫です 👌
 
 ![インストールした拡張が表示されている画像](/images/chrome-extension-article/chrome-extension-install-complete.png)
 
