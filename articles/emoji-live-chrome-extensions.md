@@ -181,7 +181,7 @@ const _enumerateDevices = navigator.mediaDevices.enumerateDevices.bind(
 // `enumerateDevices()`を上書きする
 navigator.mediaDevices.enumerateDevices = async function () {
   // 使用できるデバイス(マイク・カメラなど)を取得する
-  const devides = await _enumerateDevices();
+  const devices = await _enumerateDevices();
 
   // 仮想デバイスの情報を定義
   const virtualDevice = {
@@ -192,9 +192,9 @@ navigator.mediaDevices.enumerateDevices = async function () {
   } as const;
 
   // 仮想デバイスを追加する
-  res.push({ ...virtualDevice, toJSON: () => ({ ...virtualDevice }) });
+  devices.push({ ...virtualDevice, toJSON: () => ({ ...virtualDevice }) });
 
-  return res;
+  return devices;
 }
 ```
 
