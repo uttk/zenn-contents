@@ -3,7 +3,7 @@ title: "無駄に話が長い人を無駄に邪魔する無駄なChrome拡張"
 emoji: "🧇"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["webrtc", "chromeextension"]
-published: false
+published: true
 ---
 
 # この記事について
