@@ -1,5 +1,5 @@
 ---
-title: 'Tree Shaking 的に re-export はやめたほうがいいかもね'
+title: 'Tree Shaking 的に re-export はやめたほうがいいかも'
 emoji: '🦆'
 type: 'tech' # tech: 技術記事 / idea: アイデア
 topics: ['typescript', 'treeshaking']
