@@ -1,5 +1,5 @@
 ---
-title: 'Tree Shaking 的に re-export はやめたほうがいいかも'
+title: '古いライブラリを使っている場合は re-export はやめたほうがいいかも'
 emoji: '🦆'
 type: 'tech' # tech: 技術記事 / idea: アイデア
 topics: ['typescript', 'treeshaking']
@@ -13,31 +13,38 @@ published: true
 
 # 結論
 
-Tree Shaking はグローバルな処理( ファイル内では未使用でない )に対して有効に働かない場合があります。ファイルサイズを小さくしたいのであれば、`re-export` などを使用せずに [信頼できる唯一の情報源](https://ja.wikipedia.org/wiki/信頼できる唯一の情報源) に従った方が良いと思います。
+古いライブラリには [Tree Shaking](https://developer.mozilla.org/ja/docs/Glossary/Tree_shaking) に対応して無いモノがあり、それらのライブラリを使っているソースコードで `re-export` を使用してしまうと、不用意にファイルサイズを大きくしてしまう可能性があります。そのため、古いライブラリを使用している状況下である場合 ( またはそのような状況になりそうな場合 ) には、`re-export` などを使用せずに [信頼できる唯一の情報源](https://ja.wikipedia.org/wiki/信頼できる唯一の情報源) に従った方が良いと思います。
 
-`re-export` してしまうと、他のファイルにグローバルな処理が書かれていた場合、import 先で使用されていなくてもバンドルされる可能性がありますが、どうしても re-export したい場合は、export 先のファイルにグローバルな処理を書かないようにしたほうが良いと思います 👇
+どうしても `re-export` 使用したい場合、副作用があるファイルが分かっているのであれば、`sideEffects` オプションを使用することで影響を最小限に抑えることができます 👇
 
-```ts:bad.ts
-import { anythingFunction } from "example-library"
+```json:package.json
+{
+  /* -- 省略 -- */
 
-anythingFunction(); // 🙅‍♂️ re-export した時にバンドルに含まれる可能性があります！
+  // 全ての副作用を無効にする
+  "sideEffects": false
 
-export const sayHoge = () => console.log("Hoge");
+  /* -- 省略 -- */
+}
 ```
 
-```ts:good.ts
-import { anythingFunction } from "example-library"
+```json:package.json
+{
+  /* -- 省略 -- */
 
-export const sayHoge = () => {
+  // 特定のファイル、ライブラリの副作用を指定します
+  // これにより、指定されたファイルの副作用は含まれるようになります
+  "sideEffects": [
+    "./src/side-effects.ts",
+    "./src/side-effects/**",
+  ],
 
-  anythingFunction(); // 🙆‍♂️ sayHoge が使用されないかぎり、バンドルに含まれません！
-
-  console.log("Hoge");
+  /* -- 省略 -- */
 }
 ```
 
 :::message
-ライブラリ側にグローバルな処理があった場合は、どんなに頑張っても re-export をすると不要なコードが入ってしまうので、やるにしてもライブラリの依存度が高くない場合に使用したほうが良さそうです。
+上記の設定は、副作用があるライブラリ内部のソースコードには有効になりませんので、ご注意ください！副作用があるライブラリを使用しているファイルなどに対して設定するようにしましょう！
 :::
 
 # re-export とは？
@@ -84,9 +91,11 @@ a(); // utils で import できる！
 
 この Collect パターンは個別にファイルを import するよりも変更に強いため、非常に便利な構成となっています。
 
-# なぜ Tree Shaking 的によくないのか？
+# なぜ古いライブラリを使っていると re-export はやめたほうがいいのか？
 
-`re-export` は、複数のファイルを一つにまとめている関係上、記述したファイル全てに参照している(import している)状態となります 👇
+冒頭でも記述しましたが、古いライブラリには [Tree Shaking](https://developer.mozilla.org/ja/docs/Glossary/Tree_shaking) に対応して無いモノがあり、`re-export` を使用していると、意図せず使っていないソースコードをビルド結果に含めてしまう可能性があります。
+
+これは、 `re-export` が複数のファイルを一つにまとめている関係上、記述したファイル全てに参照している( import している )状態となるためです 👇
 
 ```ts:前項のCollectパターンと同じディレクトリ構造の場合
 import { a } from './utils'
@@ -97,24 +106,53 @@ import { a } from './utils/a'
 import {} from './utils/b'
 ```
 
-そのため、仮に `./utils/b.ts` にグローバルな処理が書かれている場合は、import した時点でグローバルな処理は読み込まれるため、export している値が無くてもグローバルな処理自体は含まれてしまいます 👇
+そのため、仮に `./utils/b.ts` で副作用があるライブラリを読み込んでいる場合は、import した時点で副作用が読み込まれてしまうため、import している値が無くても副作用自体は含まれてしまいます 👇
 
 ```ts:./utils/b.ts
-// このファイルを import するだけでビルドに含まれる
-console.log("hoge");
+// グローバルな処理(副作用)があるライブラリ
+// b.ts を import したファイルは、b.ts のソースコードを使用してなくても、
+// import した時点で "side-effects-library" の副作用を含めてしまいます
+import { printText } from "side-effects-library"
 
-// 明示的に import しないとビルドに含まれない
-export const b = () => console.log("b");
-
-// 未使用の変数などの場合は、そもそもビルドに含まれない
-const text = "Hello World!"
+// 明示的に import しないとビルドに含まれません
+export const b = () => printText("b");
 ```
 
-上記の例では、修正可能な範囲でグローバルな処理が書かれているので、注意していればこの問題は防げるかもしれません。
+# 対処法
 
-しかし、**グローバルな処理がライブラリ側に掛かれていた場合は、`re-export` を使っている限りこの問題を回避できません！**
+対処法として package.json に `sideEffects` というフィールドを設定することで、副作用があるファイルを webpack などのバンドラーに知らせることができます 👇
 
-なので、 Tree Shaking 的というか筆者の経験からは、 `re-export` はあんまり使わない方が良いかもと思っています。
+```json:package.json
+{
+  /* -- 省略 -- */
+
+  // 副作用がないということをバンドラーに知らせる
+  "sideEffects": false,
+
+  /* -- 省略 -- */
+}
+```
+
+```json:package.json
+{
+  /* -- 省略 -- */
+
+  // 副作用があるファイルが分かる場合は指定する事もできます。
+  // これによって、ここで指定していないファイルの副作用は無視されます。
+  "sideEffects": [
+    "./src/side-effects.ts",
+    "./src/side-effects/**",
+  ],
+
+  /* -- 省略 -- */
+}
+```
+
+上記の設定によって副作用があるファイルを設定できるので、自分たちが把握できる副作用に関しては Tree Shaking を有効にすることができます。
+
+しかし、どのライブラリに副作用があるかを把握するのは至難の業であるため、対処ができると言っても限界があります。
+
+なので、筆者個人の考えとしては `re-export` をむやみやたらに使うのではなく、副作用が把握できる範囲で使用したほうがいいと考えています。
 
 # 参考
 
@@ -125,11 +163,17 @@ https://zenn.dev/mizchi/scraps/fee64e76afc10d
 
 https://qiita.com/soarflat/items/755bbbcd6eb81bd128c4
 
+https://www.kabuku.co.jp/developers/tree-shaking-in-2018
+
+https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free
+
+https://dwango-js.github.io/performance-handbook/startup/module-field/
+
 # あとがき
 
-この記事では `re-export` を使わない方が良いと言っていますが、ビルドサイズを気にしないのであれば気にせず使っても良いと思います。実際、Collect パターンは便利なので...
+この記事では `re-export` を使わない方が良いと言っていますが、ビルドサイズを気にしないのであれば気にせず使っても良いと思います。実際、Collect パターンは便利ですし、Tree Shaking に対応したライブラリのみ使用している場合は、特に気にする必要のない話題です。ただ私の環境では古いライブラリを使用しており、致命的な問題だったので、この場を借りて共有した次第です。
 
-ただ私の環境では、致命的な問題だったので、この場を借りて共有した次第です。
+また、記事の内容に対してご指摘頂いた [@smikitky](https://zenn.dev/smikitky) さんには、この場を借りて感謝申し上げます。ありがとうございました 🙇‍♂️🙇‍♀️
 
 これが誰かの参考になれば幸いです。
 記事に間違いなどがあれば、コメントなどで教えて頂けると嬉しいです。
