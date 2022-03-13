@@ -1,5 +1,5 @@
 ---
-title: '古いライブラリを使っている場合は re-export はやめたほうがいいかも'
+title: 'Tree Shaking に対応してないライブラリを使っている場合は re-export はやめたほうがいいかも'
 emoji: '🦆'
 type: 'tech' # tech: 技術記事 / idea: アイデア
 topics: ['typescript', 'treeshaking']
@@ -13,7 +13,7 @@ published: true
 
 # 結論
 
-古いライブラリには [Tree Shaking](https://developer.mozilla.org/ja/docs/Glossary/Tree_shaking) に対応して無いモノがあり、それらのライブラリを使っているソースコードで `re-export` を使用してしまうと、不用意にファイルサイズを大きくしてしまう可能性があります。そのため、古いライブラリを使用している状況下である場合 ( またはそのような状況になりそうな場合 ) には、`re-export` などを使用せずに [信頼できる唯一の情報源](https://ja.wikipedia.org/wiki/信頼できる唯一の情報源) に従った方が良いと思います。
+[Tree Shaking](https://developer.mozilla.org/ja/docs/Glossary/Tree_shaking) に対応してないライブラリを使っているソースコードで `re-export` を使用していると、不用意にファイルサイズを大きくしてしまう可能性があります。そのため、対応してないライブラリを使用している状況下である場合 ( またはそのような状況になりそうな場合 ) には、`re-export` などを使用せずに [信頼できる唯一の情報源](https://ja.wikipedia.org/wiki/信頼できる唯一の情報源) に従った方が良いと思います。
 
 どうしても `re-export` 使用したい場合、副作用があるファイルが分かっているのであれば、`sideEffects` オプションを使用することで影響を最小限に抑えることができます 👇
 
@@ -91,9 +91,9 @@ a(); // utils で import できる！
 
 この Collect パターンは個別にファイルを import するよりも変更に強いため、非常に便利な構成となっています。
 
-# なぜ古いライブラリを使っていると re-export はやめたほうがいいのか？
+# なぜ re-export はやめたほうがいいのか？
 
-冒頭でも記述しましたが、古いライブラリには [Tree Shaking](https://developer.mozilla.org/ja/docs/Glossary/Tree_shaking) に対応して無いモノがあり、`re-export` を使用していると、意図せず使っていないソースコードをビルド結果に含めてしまう可能性があります。
+冒頭でも記述しましたが、[Tree Shaking](https://developer.mozilla.org/ja/docs/Glossary/Tree_shaking) に対応してないライブラリを使っているソースコードで、`re-export` を使用していると、意図せず使っていないソースコードをビルド結果に含めてしまう可能性があります。
 
 これは、 `re-export` が複数のファイルを一つにまとめている関係上、記述したファイル全てに参照している( import している )状態となるためです 👇
 
@@ -171,7 +171,7 @@ https://dwango-js.github.io/performance-handbook/startup/module-field/
 
 # あとがき
 
-この記事では `re-export` を使わない方が良いと言っていますが、ビルドサイズを気にしないのであれば気にせず使っても良いと思います。実際、Collect パターンは便利ですし、Tree Shaking に対応したライブラリのみ使用している場合は、特に気にする必要のない話題です。ただ私の環境では古いライブラリを使用しており、致命的な問題だったので、この場を借りて共有した次第です。
+この記事では `re-export` を使わない方が良いと言っていますが、ビルドサイズを気にしないのであれば気にせず使っても良いと思います。実際、Collect パターンは便利ですし、Tree Shaking に対応したライブラリのみ使用している場合は、特に気にする必要のない話題です。ただ私の環境では対応してないライブラリを使用しており、致命的な問題だったので、この場を借りて共有した次第です。
 
 また、記事の内容に対してご指摘頂いた [@smikitky](https://zenn.dev/smikitky) さんには、この場を借りて感謝申し上げます。ありがとうございました 🙇‍♂️🙇‍♀️
 
