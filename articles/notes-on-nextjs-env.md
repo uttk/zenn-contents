@@ -3,7 +3,7 @@ title: "Next.jsの環境変数(ステージング)は気をつけたほうが、
 emoji: "🧸"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["nextjs"]
-published: false
+published: true
 ---
 
 # 結論
