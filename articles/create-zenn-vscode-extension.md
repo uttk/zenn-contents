@@ -12,7 +12,7 @@ publication_name: team_zenn
 どうも皆さん、こんにちは。
 Zenn でお手伝いさせてもらっています uttk です。
 
-今回は、先日公開された [github.dev](https://github.dev) で Zenn のコンテンツを表示するための VSCode Web 拡張（β）の簡易版を作って VSCode Web Extension に入門してみようと思います 💪
+今回は、先日公開された [github.dev](https://github.dev) で Zenn のコンテンツを表示するための VSCode 拡張（β）の簡易版を作って VSCode Web Extension に入門してみようと思います 💪
 
 https://info.zenn.dev/release-vscode-extension
 
@@ -83,7 +83,7 @@ _`yarn run-in-browser`を実行したときに開くブラウザ_
 
 VSCode を使っている場合は、VSCode のデバッグ機能を使うことで拡張を実行できます 👇
 
-![](/images//create-zenn-vscode-extension/run-web-extension.png)
+![](/images/create-zenn-vscode-extension/run-web-extension.png)
 _デバッグパネルで`Run Web Extension`を選択する_
 
 `F5`キーまたはデバッグ実行ボタンを押してデバッグを開始すると、新しい VSCode ウィンドウが立ち上がります 👇
@@ -1308,7 +1308,7 @@ _記事をプレビューしている様子_
 
 https://github.com/zenn-dev/zenn-vscode-extension
 
-**P.S. OSS で開発しているので、みなさんからのコントリビューションお待ちしています 👾**
+**P.S. OSS で開発しているので、みなさんからのコントリビューションお待ちしています 🐈**
 
 これが誰かの参考になれば幸いです。
 記事に間違いなどがあれば、コメントなどで教えて頂けると嬉しいです。
