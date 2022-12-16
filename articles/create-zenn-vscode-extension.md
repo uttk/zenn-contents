@@ -3,7 +3,7 @@ title: Zenn の VSCode 拡張（ 簡易版 ）を作って VSCode Web Extension 
 emoji: 🥳
 type: 'tech' # tech: 技術記事 / idea: アイデア
 topics: [zenn, vscode]
-published: false
+published: true
 publication_name: team_zenn
 ---
 
