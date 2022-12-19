@@ -6,6 +6,13 @@ topics: ["react", "typescript", "swr"]
 published: true
 ---
 
+:::message
+[SWR 2.0 がリリースされました🎉](https://swr.vercel.app/ja/blog/swr-v2)
+それに伴いこの記事の内容は古くなっています！
+そのため、なるべくは [公式ドキュメント ( 日本語版もあります！ )](https://swr.vercel.app/ja) を参照してください！
+:::
+
+
 # この記事について
 
 SWR について色々と学んだので、その知見をここで共有したいと思います 💪
