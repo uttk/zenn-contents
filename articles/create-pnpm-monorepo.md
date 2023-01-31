@@ -4,7 +4,6 @@ emoji: '🌿'
 type: 'tech' # tech: 技術記事 / idea: アイデア
 topics: [pnpm, turborepo, monorepo]
 published: true
-publication_name: team_zenn
 ---
 
 ## この記事について
