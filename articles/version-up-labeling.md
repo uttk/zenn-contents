@@ -1,6 +1,6 @@
 ---
 title: 'GitHub Actions を使ってラベルで package.json の version を更新する'
-emoji: '🌊'
+emoji: '🦡'
 type: 'tech' # tech: 技術記事 / idea: アイデア
 topics: ['githubactions']
 published: true
