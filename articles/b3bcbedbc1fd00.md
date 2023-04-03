@@ -211,13 +211,24 @@ const { data: user } = useSWR(
 
 これにより、 `useSWR()` に `token` を認識させることが可能となり、URL にパラメータを含まないようなリクエストにも対応します。また、第二引数に渡す `fetcher` には第一引数で渡した配列が渡されますので、[分割代入](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment)を活用してシンプルに書けることも覚えておきましょう 🌭
 
-### 一応 fetcher は省略できる
+また、配列と同様にオブジェクトも直接渡す事もできます 👇
 
-:::message alert
-SWR 1.0 以降から`<SWRConfig />`を使用した場合にのみ、fetcher を省略できるようになりました。詳しくは [こちら](https://swr.vercel.app/ja/blog/swr-v1#デフォルトのフェッチャーはもうありません) をご覧ください。
+```ts:公式サイトより引用
+const { data } = useSWR(
+  { url: '/api/user', args: user },
+  ({ url, args }) => fetcher(url, args)
+)
+```
+
+オブジェクトを渡した時も `fetcher` には第一引数で渡したオブジェクトが渡されますので、シンプルに書くことができます。
+
+:::message
+SWR 1.1.0 からは、第一引数に渡したキーは内部で自動的にシリアライズされます。
 :::
 
-後述する`<SWRConfig />`の`fetcher`オプションを使うことで、デフォルトの fetcher を設定できます。具体的には、以下のようにします 👇
+### 一応 fetcher は省略できる
+
+後述する `<SWRConfig />` の `fetcher` オプションを使うことで、デフォルトの fetcher を設定できます。具体的には、以下のようにします 👇
 
 ```tsx:fetcher部分を省略する方法
 import useSWR, { SWRConfig } from 'swr'
@@ -255,13 +266,16 @@ useSWR("/api/user", fetcher, options);
 
 ただ、`useSWR()` にオプションは渡せても使うたびに渡さないといけないようでは、とても扱いづらくなってしまいます。そこで、`<SWRConfig />` を使う事で設定を共通化することができます 👇
 
-```tsx:公式サイトより引用したものを少し改変
+```tsx:<SWRConfig /> を使う例
 import useSWR, { SWRConfig } from 'swr'
 
 function Dashboard () {
+  // グローバルの設定で実行
   const { data: events } = useSWR('/api/events')
-  const { data: projects } = useSWR('/api/projects')
-  const { data: user } = useSWR('/api/user', { refreshInterval: 0 }) // 設定を上書き
+
+  // 一部の設定を上書きして実行
+  const { data: users } = useSWR('/api/user', { refreshInterval: 0 })
+
   // ...
 }
 
@@ -271,7 +285,7 @@ function App () {
     <SWRConfig
       value={{
         refreshInterval: 3000,
-        fetcher: (resource, init) => fetch(resource, init).then(res => res.json())
+        fetcher: (path, init) => fetch(path, init).then(r => r.json())
       }}
     >
       <Dashboard />
@@ -280,7 +294,7 @@ function App () {
 }
 ```
 
-:::message alert
+:::message
 ただし `useSWR()` にオプションが渡されている場合は、そちらのオプションの方が優先されるので注意が必要です。
 :::
 
@@ -335,7 +349,7 @@ const Component = () => {
 
 ## エラー時の再試行
 
-SWR では fetcher がエラーを発生した場合、fetcher を [exponential backoff アルゴリズム](https://en.wikipedia.org/wiki/Exponential_backoff) を使用して再実行します。しかし、場合によってはこれは必要ないかもしれません。なので、`onErrorRetry` オプションを使用して、この動作をオーバーライドすることが可能です。
+SWR では fetcher がエラーを発生した場合、fetcher を [exponential backoff アルゴリズム](https://en.wikipedia.org/wiki/Exponential_backoff) を使用して再実行します。しかし、場合によってはこれは必要ないかもしれません。なので、`onErrorRetry` オプションを使用して、この動作をオーバーライドすることが可能です 👇
 
 ```ts:公式サイトより引用
 useSWR('/api/user', fetcher, {
@@ -355,20 +369,20 @@ useSWR('/api/user', fetcher, {
 })
 ```
 
-このコールバックにより任意のタイミングで fetcher を再試行できますが、そもそも再試行する必要が無い場合もあると思います。その時は、 `shouldRetryOnError: false` を指定する事により再試行を無効にすることが可能です。
+このコールバックにより任意のタイミングで `fetcher` を再試行できますが、そもそも再試行する必要が無い場合もあると思います。その時は、 `shouldRetryOnError: false` を指定する事により再試行を無効にすることが可能です。
 
-## Mutation
+## ミューテーション
 
-SWR で、GET 以外の POST や DELETE といった処理には Mutation を使うことで対応できますが、Mutation を使う方法は、筆者が考えるに 4 通りありますので、この節ではその方法とその方法に対する筆者の知見を紹介したいと思います。
+SWR で、GET 以外の POST や DELETE といった更新処理にはミューテーション( Mutation )を使うことで対応できますが、ミューテーションを使う方法は、筆者が考えるに 4 通りありますので、この節ではその方法とその方法に対する筆者の知見を紹介したいと思います。
 
-※ 方法の名前は分かりやすいさの為に、一部勝手に付けています。ご了承ください。
+※ 方法の名前は分かりやすいさの為に、一部勝手に付けています。ご了承ください 🙏
 
-### 方法その１( Bound Mutate )
+### 方法その１: Bound Mutate
 
-**Bound Mutate は、一番オススメの方法です。**
-先ずは、ソースコードを見てみましょう。
+Bound Mutate は、**一番オススメの方法**です。
+まずは、ソースコードを見てみましょう 👇
 
-```ts:BoundMutateのソースコード
+```ts:Bound Mutate のソースコード
 const DisplayCatName = () => {
   const { data: cat, mutate } = useSWR("/cat", fetcher);
 
@@ -378,6 +392,7 @@ const DisplayCatName = () => {
     mutate({ ...cat, name: catName }); // ここでSWRに変更を通知する
 
     // 再検証されたくない(渡した値を最新とする)場合は、第二引数にfalseを渡してください
+    // これにより再検証によって通信回数が増えてしまうのを防げます
     // mutate({ ...cat, name: catName }, false);
   };
 
@@ -387,21 +402,21 @@ const DisplayCatName = () => {
 
 上記のソースコードでは、`useSWR()` が返すオブジェクトの中に `mutate` と言う関数があります。これに更新したい内容を渡すことで、**SWR にキャッシュの更新を通知することができます。**
 
-この方法の良い所は、TypeScript を使っていれば `mutate` の引数に型が付いているので、**データの整合性が保つ事ができて扱いやすい事**と、**処理範囲を限定できる事**です。これにより、バグに対処しやすくなります。
+この方法の良い所は、TypeScript を使っていれば `mutate` の引数に型が付いているので、**データの整合性が保つ事ができて扱いやすい点** と **処理範囲を限定できる点** です。これにより、バグに対処しやすくなります。
 
 悪い所を上げるとするならば、`useSWR()` を実行する必要があるため、他のコンポーネントとの連携がやりにくいという欠点があります。しかし、それを補う機能が SWR にはありますので、そこまで気にする必要はありません！
 
-また、**`mutate()` の第二引数に `false` を渡さないと再検証が実行されるため、意図せず refetch(再取得) が発生してしまう事に注意しましょう！**
+また、`mutate()` の第二引数に `false` を渡さないと再検証が実行されるため、意図せず refetch ( 再取得 )が発生してしまう事に注意しましょう！
 
 :::message
-`mutate()` の再検証は、オプションや`useSWRImmutable()`で自動再検証機能を無効にしている場合でも発生しますので、注意してください！
+`mutate()` の再検証は、オプションや `useSWRImmutable()` で自動再検証機能を無効にしている場合でも発生しますので、注意してください！
 :::
 
-### 方法その２( Refetch Mutation )
+### 方法その２: Refetch Mutation
 
-Refetch Mutation は、名前が示す通り refetch(再取得) によってデータの整合性を保つ方法です。ソースコードを見てみましょう。
+Refetch Mutation は、名前が示す通り refetch ( 再取得 )によってデータの整合性を保つ方法です。ソースコードを見てみましょう 👇
 
-```ts:RefetchMutationのソースコード
+```ts:Refetch Mutation のソースコード
 import useSWR, { useSWRConfig } from "swr";
 
 const DisplayCatName = () => {
@@ -415,6 +430,9 @@ const DisplayCatName = () => {
 
     // もしキーを配列で渡している場合は以下のようにします
     // mutate(["/cat"]);
+
+    // もしキーをオブジェクトで渡している場合は以下のようにします
+    // mutate({ path: "/cat" });
   };
 
   /* -- 省略 -- */
@@ -423,18 +441,18 @@ const DisplayCatName = () => {
 
 Bound Mutate と違う所は、 `mutate` 関数を `useSWRConfig()` から取得していることと、実行時にキー文字列( 今回は "/cat" )だけを渡す必要があるという事です。
 
-このように実行する事によって、SWR に refetch(再取得) を実行するように指示することができます。**これによって、サーバーとの間でデータの整合性を保つことができます！** サーバーとの同期が多く必要なサービスや、サーバー上で複雑な処理をしている場合は、重宝する方法ですね。
+このように実行する事によって、SWR に refetch ( 再取得 )を実行するように指示することができます。**これによって、サーバーとの間でデータの整合性を保つことができます！** サーバーとの同期が多く必要なサービスや、サーバー上で複雑な処理をしている場合は、重宝する方法ですね。
 
 注意点を上げるとすると、関数の名前が Bound Mutate と同じ `mutate` なので名前の競合が起きやすい事と、**多用しすぎるとサーバーに負荷がかかりすぎる**ので、注意しましょう！👩‍🏫
 
 :::message
-ソースコード内のコメントにも書いてありますが、useSWR()の第一引数に配列を渡している場合は、mutate()でも同じ値を持った配列を渡す必要があります。
+Refetch Mutation は、同じキーを使用するマウントされた `useSWR()` がない限り、キャッシュが更新されず、再検証がトリガーされない( 要は何もしない )ことに注意してください！
 :::
 
-### 方法その３( Update Local Mutate )
+### 方法その３: Update Local Mutate
 
 Update Local Mutate は、Refetch Mutation とほとんど同じような使い方です。
-ソースコードを見てみましょう。
+ソースコードを見てみましょう 👇
 
 ```ts:UpdateLocalMutateのソースコード
 import useSWR, { useSWRConfig } from "swr";
@@ -466,11 +484,13 @@ const DisplayCatName = () => {
 
 実行方法は Refetch Mutation とほとんど同じですが、`mutate()` の第二引数に更新する値を渡している所が違います。
 
-このやり方が便利な所は、refetch(再取得) が発生しない事と、別の場所で使われている `useSWR()` に変更を通知することができます。これによって、離れた位置のコンポーネントの状態などを変更することができるので、**うまく使えばサーバーへの負荷を抑えつつキャッシュをより有効活用することができます 💪**
+このやり方が便利な所は、refetch ( 再取得 )が発生しない事と、別の場所で使われている `useSWR()` に変更を通知することができます。これによって、離れた位置のコンポーネントの状態などを変更することができるので、**うまく使えばサーバーへの負荷を抑えつつキャッシュをより有効活用することができます 💪**
 
-ただ注意としては、使いすぎると複雑なバグを引き起こしかねないので、Bound Mutate が使える場合は、そちらを使った方が良いと思います 🤔 ※ Boud Muatate だと範囲を限定できるので、バグを限定的にすることができます。
+ただ注意としては、使いすぎると複雑なバグを引き起こしかねないので、Bound Mutate が使える場合は、そちらを使った方が良いと思います 🤔
 
-### 方法その４( Mutate Based on Current Data )
+※ Boud Muatate だと範囲を限定できるので、バグを限定的にすることができます。
+
+### 方法その４: Mutate Based on Current Data
 
 最後に Mutate Based on Current Data を紹介します。
 ソースコードを見てみましょう。
@@ -505,7 +525,7 @@ const DisplayCatName = () => {
 
 ただ、こちらの方法はデータの整合性を保つのが難しい(引数で受け取る値が any)ですし、複雑なロジックが実行できるという事は、それだけバグを発生させやすいという事でもありますので、多用は禁物だと思います 🦉
 
-### Mutation まとめ
+### ミューテーションまとめ
 
 上記の方法を筆者の知見を交えてまとめたいと思います。
 
