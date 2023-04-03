@@ -243,7 +243,7 @@ const UserList = () => {
 これで基本的な使い方の紹介は終了です ✨
 これ以降は、より高度な使い方やオプションについて解説していきます 💪
 
-## グローバル設定( Global Configuration )
+## グローバル設定
 
 `useSWR()` の第三引数には、オプションを渡すことができます。
 
@@ -251,9 +251,9 @@ const UserList = () => {
 useSWR("/api/user", fetcher, options);
 ```
 
-options の詳細は下の方に書いてありますので、[ぜひ参考にして下さい](#オプションについて)🙏
+`options` の詳細は [公式ドキュメント](https://swr.vercel.app/ja/docs/api#オプション) に記載されていますので、ぜひご確認ください。
 
-しかし、`useSWR()` にオプションは渡せても使うたびに渡さないといけないようでは、とても扱いづらくなってしまいます。そこで、`<SWRConfig />` を使う事で設定を共通化することができます。
+ただ、`useSWR()` にオプションは渡せても使うたびに渡さないといけないようでは、とても扱いづらくなってしまいます。そこで、`<SWRConfig />` を使う事で設定を共通化することができます 👇
 
 ```tsx:公式サイトより引用したものを少し改変
 import useSWR, { SWRConfig } from 'swr'
@@ -293,16 +293,28 @@ import { useSWRConfig } from 'swr'
 
 const Component = () => {
   // グローバル設定を取得する
+  // `<SWRConfig />` を使っていない場合は、デフォルトの設定値を返します。
   const { refreshInterval, mutate, cache, ...restConfig } = useSWRConfig();
 
   /* ... */
 }
 ```
 
-基本的には、後述する `mutate()` や Cache Provider を取得するために使用することが多いと思います。
-また、ネストされた設定の場合は拡張(マージ)された設定値が返りますが、 `<SWRConfig />` を使っていない場合は、デフォルトの設定値を返します。
+基本的には、後述する `mutate()` や Cache Provider を取得するために使用することが多いと思いますが、どう活用するかはキミ次第！自分なりの使い方を模索してみて下さい 🍜
 
-## Global Error
+あと、以下のようにネストされた設定の場合は拡張(マージ)された設定値が返されます 👇
+
+```tsx:SWRConfigをネストしている例
+<SWRConfig value={...}>
+  {...}
+    <SWRConfig value={...}>
+      {/* この<SWRConfig />内では、がっちゃんこした設定値が適用されます */}
+    </SWRConfig>
+  {...}
+</SWRConfig>
+```
+
+## グローバルエラー処理
 
 上記で解説した `<SWRConfig />` の `onError` オプションにコールバックを設定する事で、エラーをグローバルに処理することができます。
 
@@ -310,8 +322,8 @@ const Component = () => {
 <SWRConfig value={{
   onError: (error, key) => {
     if (error.status !== 403 && error.status !== 404) {
-      // We can send the error to Sentry,
-      // or show a notification UI.
+      // エラーをSentryに送信するか、
+      // 通知UIを表示することができます。
     }
   }
 }}>
@@ -321,21 +333,24 @@ const Component = () => {
 
 アラート系のライブラリと組み合わせると、シンプルにエラー処理が実装できますので、どんどん活用していきましょう 🤘
 
-## Error Retry
+## エラー時の再試行
 
-SWR では fetcher がエラーを発生した場合、fetcher を [exponential backoff アルゴリズム](https://en.wikipedia.org/wiki/Exponential_backoff) を使用して再実行します。しかし、場合によってはこれは必要ないかもしれません。なので、`onErrorRetry`オプションを使用して、この動作をオーバーライドすることが可能です。
+SWR では fetcher がエラーを発生した場合、fetcher を [exponential backoff アルゴリズム](https://en.wikipedia.org/wiki/Exponential_backoff) を使用して再実行します。しかし、場合によってはこれは必要ないかもしれません。なので、`onErrorRetry` オプションを使用して、この動作をオーバーライドすることが可能です。
 
 ```ts:公式サイトより引用
 useSWR('/api/user', fetcher, {
   onErrorRetry: (error, key, config, revalidate, { retryCount }) => {
     // 404では再試行しない。
     if (error.status === 404) return
+
     // 特定のキーでは再試行しない。
     if (key === '/api/user') return
+
     // 再試行は10回までしかできません。
     if (retryCount >= 10) return
+
     // 5秒後に再試行します。
-    setTimeout(() => revalidate({ retryCount: retryCount + 1 }), 5000)
+    setTimeout(() => revalidate({ retryCount }), 5000)
   }
 })
 ```
@@ -1167,244 +1182,6 @@ SWR は、[React Native](https://reactnative.dev/) でも使用することが�
 ```
 
 上記のソースコードにより、React Native でもアクティブモードへ移行した時に、フォーカス時の再検証( Revalidate on Focus )が実行されるようになります。
-
-## オプションについて
-
-`useSWR`にはオプションを渡すことができます。
-
-```ts:useSWRにオプションを渡す例
-const { data } = useSWR(key, fetcher, optoins);
-```
-
-この`options`の内容をご紹介したいと思いますが、結構量があるため、簡単な解説と型情報をのみを記述したいと思います。
-
-:::details オプション一覧
-
-### suspense
-
-| 型      | デフォルト値 | 効果                                                                                               |
-| ------- | ------------ | -------------------------------------------------------------------------------------------------- |
-| boolean | false        | [React Suspence モード](https://ja.reactjs.org/docs/concurrent-mode-suspense.html)を有効にします。 |
-
-### fetcher
-
-| 型        | デフォルト値 | 効果                                  |
-| --------- | ------------ | ------------------------------------- |
-| ※以下参照 | undefined    | デフォルトの`fetcher`関数を設定します |
-
-```ts:fetcherの型
-type Fetcher<Data> = (...args: any) => Data | Promise<Data>
-```
-
-### fallback
-
-| 型  | デフォルト値 | 効果                                |
-| --- | ------------ | ----------------------------------- |
-| any | undefined    | 初期データの key-value オブジェクト |
-
-### fallbackData
-
-| 型  | デフォルト値 | 効果               |
-| --- | ------------ | ------------------ |
-| any | undefined    | 初期値を設定します |
-
-### revalidateIfStale
-
-| 型      | デフォルト値 | 効果                                                   |
-| ------- | ------------ | ------------------------------------------------------ |
-| boolean | true         | 古いデータがある場合でも、マウント時に自動再検証をする |
-
-### revalidateOnMount
-
-| 型      | デフォルト値 | 効果                                               |
-| ------- | ------------ | -------------------------------------------------- |
-| boolean | ※以下参照    | コンポーネントがマウントした時に自動的に再検証する |
-
-※ デフォルトでは `fallbackData` が**設定されてない場合**、マウント時に再検証されます。`false` だと `fallbackData` を設定していても、再検証されません。
-
-### revalidateOnFocus
-
-| 型      | デフォルト値 | 効果                                                 |
-| ------- | ------------ | ---------------------------------------------------- |
-| boolean | true         | ウィンドウがフォーカスされたときに自動的に再検証する |
-
-※ `focusThrottleInterval` オプションで検証する期間を変更することができます。
-
-### revalidateOnReconnect
-
-| 型      | デフォルト値 | 効果                                                       |
-| ------- | ------------ | ---------------------------------------------------------- |
-| boolean | true         | ブラウザがネットワーク接続を回復した時に自動的に再検証する |
-
-### refreshInterval
-
-| 型     | デフォルト値 | 効果                                         |
-| ------ | ------------ | -------------------------------------------- |
-| number | 0            | ポーリング間隔のミリ秒（デフォルトでは無効） |
-
-### refreshWhenHidden
-
-| 型      | デフォルト値 | 効果                                                              |
-| ------- | ------------ | ----------------------------------------------------------------- |
-| boolean | false        | ウィンドウが非表示の時にポーリングする (`navigator.onLine`で判断) |
-
-※ `refreshInterval` が有効になっている場合にのみ動作します。`true` に設定する時は、**必ず** `refreshInterval` を設定してください。
-
-### refreshWhenOffline
-
-| 型      | デフォルト値 | 効果                                                                |
-| ------- | ------------ | ------------------------------------------------------------------- |
-| boolean | false        | ブラウザがオフラインの時にポーリングする (`navigator.onLine`で判断) |
-
-### refreshWhenOffline
-
-| 型      | デフォルト値 | 効果                                                                |
-| ------- | ------------ | ------------------------------------------------------------------- |
-| boolean | false        | ブラウザがオフラインの時にポーリングする (`navigator.onLine`で判断) |
-
-### shouldRetryOnError
-
-| 型      | デフォルト値 | 効果                                       |
-| ------- | ------------ | ------------------------------------------ |
-| boolean | true         | fetcher にエラーが発生したときに再試行する |
-
-### dedupingInterval
-
-| 型     | デフォルト値 | 効果                                                 |
-| ------ | ------------ | ---------------------------------------------------- |
-| number | 2000         | この期間内に同じキーでのリクエストの重複を排除します |
-
-### focusThrottleInterval
-
-| 型     | デフォルト値 | 効果                     |
-| ------ | ------------ | ------------------------ |
-| number | 5000         | 再検証する期間を指定する |
-
-※ ここでの再検証とは、`revalidateOnFocus`の事を指します。`revalidateOnFocus`オプションが false の場合は、このオプションは機能しません。
-
-### loadingTimeout
-
-| 型     | デフォルト値 | 効果                                                    |
-| ------ | ------------ | ------------------------------------------------------- |
-| number | 3000         | `onLoadingSlow`イベントをトリガーするためのタイムアウト |
-
-※ 低速ネットワーク（2G、<= 70Kbps）の場合、`loadingTimeout`は 5 秒になります。
-
-### errorRetryInterval
-
-| 型     | デフォルト値 | 効果                             |
-| ------ | ------------ | -------------------------------- |
-| number | 5000         | エラーが発生した時の再試行の間隔 |
-
-※ 低速ネットワーク（2G、<= 70Kbps）の場合、`errorRetryInterval`は 10 秒になります。
-
-### errorRetryCount
-
-| 型     | デフォルト値 | 効果                 |
-| ------ | ------------ | -------------------- |
-| number | ※以下参照    | 最大エラー再試行回数 |
-
-※ デフォルトでは、[exponential backoff アルゴリズム](https://en.wikipedia.org/wiki/Exponential_backoff)を使用してエラーの再試行を処理します
-
-### onLoadingSlow
-
-| 型        | デフォルト値 | 効果                                                           |
-| --------- | ------------ | -------------------------------------------------------------- |
-| ※以下参照 | undefined    | リクエストの読み込みに時間がかかりすぎる場合のコールバック関数 |
-
-```ts:onLoadingSlowの型
-// SWROptions は、useSWRの第三引数に渡したオプションのオブジェクトです。
-type onLoadingSlow = (key: string, config: SWROptions) => void
-```
-
-### onSuccess
-
-| 型        | デフォルト値 | 効果                                             |
-| --------- | ------------ | ------------------------------------------------ |
-| ※以下参照 | undefined    | リクエストが正常に終了したときのコールバック関数 |
-
-```ts:onSuccessの型
-// SWROptions は、useSWRの第三引数に渡したオプションのオブジェクトです。
-type onSuccess = (data: any, key: string, config: SWROptions) => void
-```
-
-### onError
-
-| 型        | デフォルト値 | 効果                                             |
-| --------- | ------------ | ------------------------------------------------ |
-| ※以下参照 | undefined    | リクエストがエラーを返したときのコールバック関数 |
-
-```ts:onErrorの型
-// SWROptions は、useSWRの第三引数に渡したオプションのオブジェクトです。
-// ※ error は fetcher が reject した値です
-type onError = (error: any, key: string, config: SWROptions) => void
-```
-
-### onErrorRetry
-
-| 型        | デフォルト値 | 効果                               |
-| --------- | ------------ | ---------------------------------- |
-| ※以下参照 | undefined    | エラー時の再試行をするコールバック |
-
-```ts:onErrorRetryの型
-// SWROptions は、useSWRの第三引数に渡したオプションのオブジェクトです。
-// ※ error は fetcher が reject した値です
-type onErrorRetry = (
-  error : any,
-  key: string,
-  config: SWROptions,
-  revalidate: (options: RevalidateOptions) => Promise<boolean>,
-  revalidateOptions: RevalidateOptions
-) => void
-
-// 再検証のオプション型
-type RevalidateOptions = {
-  dedupe: boolean;
-  retryCount: number;
-}
-```
-
-### compare
-
-| 型        | デフォルト値 | 効果                                                                                                     |
-| --------- | ------------ | -------------------------------------------------------------------------------------------------------- |
-| ※以下参照 | ※以下参照    | 誤った再レンダリングを回避するために、返されたデータがいつ変更されたかを検出するために使用される比較関数 |
-
-```ts:compareの型
-type compare = (a: any, b: any) => boolean
-```
-
-※ デフォルト値では、[dequal](https://github.com/lukeed/dequal)が使われています
-
-### isPaused
-
-| 型        | デフォルト値 | 効果                                       |
-| --------- | ------------ | ------------------------------------------ |
-| ※以下参照 | () => false  | 再検証を一時停止するかどうかを検出する関数 |
-
-```ts:isPausedの型
-type isPaused = () => boolean
-```
-
-※ `isPaused` が `true` を返す時、再検証を停止し、フェッチされたデータとエラーを無視します。デフォルトでは、`false` を返します。
-
-詳細は以下のプルリクを参照してください 🏳‍🌈
-
-https://github.com/vercel/swr/pull/845
-
-### use
-
-| 型        | デフォルト値 | 効果                   |
-| --------- | ------------ | ---------------------- |
-| ※以下参照 | undefined    | ミドルウェア関数の配列 |
-
-```ts:useの型
-type Middleware = (useSWRNext: SWRHook) => SWRHookWithMiddleware
-
-type use = Middleware[]
-```
-
-:::
 
 ## あとがき
 
