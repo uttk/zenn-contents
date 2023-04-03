@@ -1,19 +1,17 @@
 ---
-title: "そうです。わたしがReactをシンプルにするSWRです。"
-emoji: "👴"
-type: "tech"
-topics: ["react", "typescript", "swr"]
+title: 'そうです。わたしがReactをシンプルにするSWRです。'
+emoji: '👴'
+type: 'tech'
+topics: ['react', 'typescript', 'swr']
 published: true
 ---
 
-:::message
-[SWR 2.0 がリリースされました🎉](https://swr.vercel.app/ja/blog/swr-v2)
-それに伴いこの記事の内容は古くなっています！
+:::message alert
+この記事の内容は古い可能性があります！
 そのため、なるべくは [公式ドキュメント ( 日本語版もあります！ )](https://swr.vercel.app/ja) を参照してください！
 :::
 
-
-# この記事について
+## この記事について
 
 SWR について色々と学んだので、その知見をここで共有したいと思います 💪
 
@@ -23,17 +21,17 @@ https://swr.vercel.app/
 
 そのため、この記事で出すサンプルコードなどは主に上記の公式サイトから引用させてもらっています。予めご了承ください 🙏
 
-# SWR とは何か？
+## SWR とは何か？
 
-SWR は、Next.js を作っている[Vercel 社](https://vercel.com/about)が開発しているデータフェッチのための [React Hooks](https://ja.reactjs.org/docs/hooks-intro.html) ライブラリです。"SWR"と言う名前は、 `stale-while-revalidate` の頭文字をとって名付けられています。そのため、SWR は`stale-while-revalidate`に基づいた処理と設計になっています。
+SWR は、Next.js を作っている [Vercel 社](https://vercel.com/about)が開発しているデータフェッチのための [React Hooks](https://ja.reactjs.org/docs/hooks-intro.html) ライブラリです。"SWR"と言う名前は、 `stale-while-revalidate` の頭文字をとって名付けられています。そのため、SWR は `stale-while-revalidate` に基づいた処理と設計になっています。
 
-`stale-while-revalidate`について解説したい所ですが、解説するとすごく長くなってしまうため、ここでは「 **キャッシュをなるべく最新に保つ機能** 」という簡単なまとめ方で留めたいと思います。より知りたい方は RFC か以下のサイトが参考になります 👇
+`stale-while-revalidate` について解説したい所ですが、解説するとすごく長くなってしまうため、ここでは「 **キャッシュをなるべく最新に保つ機能** 」という簡単なまとめ方で留めたいと思います。より知りたい方は RFC か以下のサイトが参考になります 👇
 
 https://tools.ietf.org/html/rfc5861
 
 https://blog.jxck.io/entries/2016-04-16/stale-while-revalidate.html
 
-## SWR の特徴
+### SWR の特徴
 
 - 非常にシンプル
 - React Hooks ファースト
@@ -45,7 +43,7 @@ https://blog.jxck.io/entries/2016-04-16/stale-while-revalidate.html
 - もちろん、Next.js 対応 🎊
 - React Native でも使える 🎐
 
-# 基本的な使い方
+## 基本的な使い方
 
 基本的な使い方を見て行きたいと思います 👀
 
@@ -53,7 +51,7 @@ https://blog.jxck.io/entries/2016-04-16/stale-while-revalidate.html
 import useSWR from 'swr'
 
 function Profile() {
-  const { data, error } = useSWR('/api/user', fetcher)
+  const { data, error, isLoading } = useSWR('/api/user', fetcher)
 
   if (error) return <div>failed to load</div>
   if (!data) return <div>loading...</div>
@@ -62,22 +60,22 @@ function Profile() {
 }
 ```
 
-上記のソースコードでは、`useSWR`という[React Custom Hooks](https://ja.reactjs.org/docs/hooks-custom.html)をインポートしてコンポーネント内で使用していますが、少しコードが省略されている部分があるので補足します。
+上記のソースコードでは、`useSWR` という[React Custom Hooks](https://ja.reactjs.org/docs/hooks-custom.html)をインポートしてコンポーネント内で使用していますが、少しコードが省略されている部分があるので補足します。
 
-具体的には以下の部分の`fetcher`という所です。
+具体的には以下の部分の `fetcher` という所です。
 
 ```ts
-const { data, error } = useSWR("/api/user", fetcher);
+const { data, error, isLoading } = useSWR('/api/user', fetcher)
 ```
 
-この`fetcher`は、名前から察せられるようにデータを取得する為の関数です。
+この `fetcher` は、名前から察せられるようにデータを取得する為の関数です。
 例えば以下のような関数です。
 
 ```ts:fetcherの実装内容
 const fetcher = (url: string): Promise<any> => fetch(url).then(res => res.json());
 ```
 
-上記の`fetcher`では [fetch API](https://developer.mozilla.org/ja/docs/Web/API/Fetch_API/Using_Fetch) を使っていますが、Promise を返す関数であれば別に [fetch API](https://developer.mozilla.org/ja/docs/Web/API/Fetch_API/Using_Fetch) を使う必要はありません。Promise に対応させていれば好きなライブラリを使用することが可能です。
+上記の `fetcher` では [fetch API](https://developer.mozilla.org/ja/docs/Web/API/Fetch_API/Using_Fetch) を使っていますが、Promise を返す関数であれば別に [fetch API](https://developer.mozilla.org/ja/docs/Web/API/Fetch_API/Using_Fetch) を使う必要はありません。Promise に対応させていれば好きなライブラリを使用することが可能です。
 
 SWR の公式サイトでは、いくつかのライブラリの実装例を示してくれています。
 
@@ -86,39 +84,31 @@ https://swr.vercel.app/docs/data-fetching
 次に、`useSWR()` が返す値について見てみます。
 
 ```ts
-const { data, error } = useSWR("/api/user", fetcher);
+const { data, error, isLoading } = useSWR('/api/user', fetcher)
 ```
 
-`useSWR()` の返り値として、`data`・`error`をソースコードでは受け取っていますが、`data`には fetcher が resolve した値( 通信結果 )、もしくは`undefined`が入っています。
+`useSWR()` の返り値として、`data`・`error`・`isLoading` をソースコードでは受け取っていますが、`data` には fetcher が resolve した値( 通信結果など )か、もしくは `undefined` が入っていますので、基本的にはこの値を使って表示の出し分けをします。
 
-これは、
+次に `error` がありますが、これは文字通り fetcher 内でエラーが発生した場合に、そのエラーがそのまま `error` に入ります。もちろん、エラーが発生した無い場合は `undefined` になります。
 
-- `data` が `undefined` だと -> ロード中
-- `data` が `Promise.resolve()` した値だと -> 通信終了
+最後に `isLoading` がありますが、これは少しわかりづらいのですが、**fetcher が実行中かつ"ロードされたデータ" が無い場合に `true` になります。** そのため、後述する `mutate()` などで再検証を行った際は `false` になります。
 
-を意味しています。そのため、**`isLoading` なんてフラグは無いです 🐧**
+なんだがよく分からん！って感じですが、要は初回ロード時に `true` になるみたいに覚えておけばいいと思います。もしちゃんとした理解をしたい場合は、お近くの GPT さんに質問してみて下さい 🙃
 
-`error`も同じような感じで、
-
-- `error` が `undefined` だと -> エラーが発生していない
-- `error` が `Promise.reject()` した値だと -> エラーが発生した
-
-となります。
-
-この値を元にコンポーネント内で分岐して表示を切り替えることができますので、サンプルコードでも対応した分岐が書かれています。
+さて、上記の値を元にコンポーネント内で分岐して表示を切り替えることができますので、サンプルコードでも対応した分岐が書かれています。
 
 ```ts:公式サイトから引用
 function Profile() {
-  const { data, error } = useSWR('/api/user', fetcher)
+    const { data, error, isLoading } = useSWR('/api/user', fetcher)
 
   if (error) return <div>failed to load</div>
-  if (!data) return <div>loading...</div>
+  if (isLoading) return <div>loading...</div>
 
   return <div>hello {data.name}!</div>
 }
 ```
 
-## 条件付きフェッチ
+### 条件付きフェッチ
 
 次は、条件付きフェッチについて見て行きましょう。
 
@@ -136,9 +126,9 @@ const { data } = useSWR(() => shouldFetch ? '/api/data' : null, fetcher)
 const { data } = useSWR(() => '/api/data?uid=' + user.id, fetcher)
 ```
 
-上記のソースコードから分かると思いますが `useSWR()` の第一引数に**falsy な値**を渡すと、fetcher の実行を停止してくれます。そのため、三項演算子などを使って引数の値を変更しています。
+上記のソースコードから分かると思いますが `useSWR()` の第一引数に **falsy な値**を渡すと、fetcher の実行を停止してくれます。そのため、三項演算子などを使って引数の値を変更しています。
 
-**falsy な値**については、以下の MDN のドキュメントから確認できますが、JavaScript( TypeScript )は**falsy な値**が結構多いです。なので、知らず知らずのうちに**falsy な値**を返してしまう事があるので、注意しましょう 📌
+**falsy な値**については、以下の MDN のドキュメントから確認できますが、JavaScript( TypeScript )は **falsy な値**が結構多いです。なので、知らず知らずのうちに**falsy な値**を返してしまう事があるので、注意しましょう 📌
 
 https://developer.mozilla.org/ja/docs/Glossary/Falsy
 
@@ -152,10 +142,9 @@ const { data } = useSWR(() => '/api/data?uid=' + user.id, fetcher)
 
 コメントにも書いてある通り、引数の関数がエラーを発生させた場合もリクエストの実行をしなくなります。**ただこちらは、使うべきではありません！**
 
-何故なら、エラーが発生していても `useSWR()` はそのエラーを検出してくれません 😢
-そのため、仮に第一引数の関数にバグが発生していても気づくのが難しくなってしまいます。なので、**できれば第一引数の値には関数は使わないようにした方が良いと思います。**
+何故なら、エラーが発生していても `useSWR()` はそのエラーを変数として扱ってくれません 😢 そのため、仮に第一引数の関数にバグが発生していても気づくのが難しくなってしまいます。なので、**できれば第一引数の値には関数は使わないようにした方が良いと思います。**
 
-後、以下のように `if文` を使った分岐は[React Hooks の規約](https://ja.reactjs.org/docs/hooks-rules.html)に違反しているため、書くことができません。注意しましょう！
+あと余談ですが、以下のように `if文` を使った分岐は [React Hooks の規約](https://ja.reactjs.org/docs/hooks-rules.html)に違反しているため、書くことができません。注意しましょう！
 
 ```ts:このような書き方はできません🙅‍♂️🙅‍♀️
 if( shouldFetch ) {
@@ -163,84 +152,66 @@ if( shouldFetch ) {
 }
 ```
 
-## 依存フェッチ
+### 依存フェッチ
 
-条件付きフェッチを応用して、複数のフェッチを連携させる(依存フェッチともいう)事が可能になります。サンプルコードを見てみましょう。
+条件付きフェッチを応用して、複数のフェッチを連携させる( 依存フェッチともいう )事が可能になります。サンプルコードを見てみましょう。
 
 ```ts:公式サイトより引用したものを少し改変
-function MyProjects () {
+function MyTasks () {
   const { data: user } = useSWR('/api/user', fetcher)
-  const { data: projects } = useSWR(() => '/api/projects?uid=' + user.id, fetcher)
+  const { data: tasks } = useSWR(() => '/api/tasks?id=' + user.id, fetcher)
   // 関数を渡す場合、SWRは返り値を`key`として使用します。
   // 関数がスローまたは falsy な値を返す場合、
   // SWRはいくつかの依存関係が準備できてないことを知ることができます。
   // この例では、`user.id`は`user`がロードされてない時にスローします。
 
-  if (!projects) return 'loading...'
+  if (!tasks) return 'loading...'
 
-  return 'You have ' + projects.length + ' projects'
+  return 'You have ' + tasks.length + ' tasks'
 }
 ```
 
-上記のソースコードでの、`/api/projects` へのリクエストは `'/api/user'` が完了してからしか実行されません。
+上記のソースコードの `'/api/tasks'` へのリクエストは `'/api/user'` が完了してからしか実行されません。
 
-また、何らかの要因で `'/api/user'` のリクエスト結果(この場合は`user`) が変更した場合は、自動的に `/api/projects` へのリクエストが発生します。これにより `projects` の値は、常に `user` に対してデータの整合性を保つようになっています。
+また、何らかの要因で `'/api/user'` のリクエスト結果( この場合は `user` )が変更した場合は、自動的に `/api/tasks` へのリクエストが発生します。これにより `tasks` の値は、常に `user` に対してデータの整合性を保つようになっています。
 
 条件付きフェッチの応用ですが、とても有用なテクニックなので、是非ともマスターしておきたいテクニックですね！
 
-因みに、前述した通り`useSWR()`の第一引数には**関数を指定するべきではありません！**
+因みに、前述した通り `useSWR()` の第一引数には**関数を指定するべきではありません！**
 なので、上記のソースコードは以下のようにした方が良いです 👇
 
 ```diff ts:上記のソースコードを修正
-function MyProjects () {
+function MyTasks () {
   const { data: user } = useSWR('/api/user', fetcher)
-- const { data: projects } = useSWR(() => '/api/projects?uid=' + user.id, fetcher)
-+ const { data: projects } = useSWR(user ? `/api/projects?uid=${user.id}` : null, fetcher)
+- const { data: tasks } = useSWR(() => '/api/tasks?id=' + user.id, fetcher)
++ const { data: tasks } = useSWR(user ? `/api/tasks?id=${user.id}` : null, fetcher)
   // 関数を渡す場合、SWRは返り値を`key`として使用します。
   // 関数がスローまたは falsy な値を返す場合、
   // SWRはいくつかの依存関係が準備できてないことを知ることができます。
   // この例では、`user.id`は`user`がロードされてない時にスローします。
 
-  if (!projects) return 'loading...'
+  if (!tasks) return 'loading...'
 
-  return 'You have ' + projects.length + ' projects'
+  return 'You have ' + tasks.length + ' tasks'
 }
 ```
 
-## パラメータ付きのフェッチ
+### パラメータ付きのフェッチ
 
 リクエストにパラメータを付けたい事が多いと思いますが、 `useSWR()` にはパラメータを文字列以外にも配列として渡すことができます。サンプルコードを見てみましょう。
 
 ```ts:公式サイトより引用
-const { data: user } = useSWR(['/api/user', token], fetchWithToken)
+const { data: user } = useSWR(
+  ['/api/user', token],
+  ([url, token]) => fetchWithToken(url, token)
+)
 ```
 
 上記のソースコードでは、`useSWR()` の第一引数に配列を渡しています。
-これにより、 `useSWR()` に `token` を認識させることが可能となり、URL にパラメータを含まないようなリクエストにも対応します。
 
-ここでの注意点として、 `useSWR()` は**配列の内容を浅い比較しかしません。** そのため、引数の値を渡す時には注意を払う必要があります。
+これにより、 `useSWR()` に `token` を認識させることが可能となり、URL にパラメータを含まないようなリクエストにも対応します。また、第二引数に渡す `fetcher` には第一引数で渡した配列が渡されますので、[分割代入](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment)を活用してシンプルに書けることも覚えておきましょう 🌭
 
-```ts:よくない例(公式サイトより引用したものを少し改変)
-// これはやらないで下さい！Depsはレンダリングごとに変更されるようになります！
-// そのため通信結果が取得できなくなります！
-useSWR(['/api/user', { id }], fetcher, query)
-
-// 代わりに、「安定した」値のみを渡す必要があります。
-useSWR(['/api/user', id], fetcher, (url, id) => query(url, { id }))
-```
-
-また、引数に渡した配列の値は fetcher の引数に渡されます。
-
-```ts
-const myFetcher = (url: string, id: number) => {
-  console.log(`url ==> ${url}, id ==> ${id}`);
-  // ...
-};
-
-useSWR(["/api/user", 1], myFetcher); // log出力結果: "url ==> /api/user, id ==> 1"
-```
-
-## fetcher は省略できる
+### 一応 fetcher は省略できる
 
 :::message alert
 SWR 1.0 以降から`<SWRConfig />`を使用した場合にのみ、fetcher を省略できるようになりました。詳しくは [こちら](https://swr.vercel.app/ja/blog/swr-v1#デフォルトのフェッチャーはもうありません) をご覧ください。
@@ -270,8 +241,9 @@ const UserList = () => {
 扱う際には注意が必要ですが、他のライブラリと一緒に使うことで、より簡潔に書けるようになるので、覚えておいて損はないですね！
 
 これで基本的な使い方の紹介は終了です ✨
+これ以降は、より高度な使い方やオプションについて解説していきます 💪
 
-# グローバル設定( Global Configuration )
+## グローバル設定( Global Configuration )
 
 `useSWR()` の第三引数には、オプションを渡すことができます。
 
@@ -312,7 +284,7 @@ function App () {
 ただし `useSWR()` にオプションが渡されている場合は、そちらのオプションの方が優先されるので注意が必要です。
 :::
 
-## グローバル設定の取得
+### グローバル設定の取得
 
 `useSWRConfig()` を使うことで、グローバル設定を取得することができます。
 
@@ -330,7 +302,7 @@ const Component = () => {
 基本的には、後述する `mutate()` や Cache Provider を取得するために使用することが多いと思います。
 また、ネストされた設定の場合は拡張(マージ)された設定値が返りますが、 `<SWRConfig />` を使っていない場合は、デフォルトの設定値を返します。
 
-# Global Error
+## Global Error
 
 上記で解説した `<SWRConfig />` の `onError` オプションにコールバックを設定する事で、エラーをグローバルに処理することができます。
 
@@ -349,7 +321,7 @@ const Component = () => {
 
 アラート系のライブラリと組み合わせると、シンプルにエラー処理が実装できますので、どんどん活用していきましょう 🤘
 
-# Error Retry
+## Error Retry
 
 SWR では fetcher がエラーを発生した場合、fetcher を [exponential backoff アルゴリズム](https://en.wikipedia.org/wiki/Exponential_backoff) を使用して再実行します。しかし、場合によってはこれは必要ないかもしれません。なので、`onErrorRetry`オプションを使用して、この動作をオーバーライドすることが可能です。
 
@@ -370,13 +342,13 @@ useSWR('/api/user', fetcher, {
 
 このコールバックにより任意のタイミングで fetcher を再試行できますが、そもそも再試行する必要が無い場合もあると思います。その時は、 `shouldRetryOnError: false` を指定する事により再試行を無効にすることが可能です。
 
-# Mutation
+## Mutation
 
 SWR で、GET 以外の POST や DELETE といった処理には Mutation を使うことで対応できますが、Mutation を使う方法は、筆者が考えるに 4 通りありますので、この節ではその方法とその方法に対する筆者の知見を紹介したいと思います。
 
 ※ 方法の名前は分かりやすいさの為に、一部勝手に付けています。ご了承ください。
 
-## 方法その１( Bound Mutate )
+### 方法その１( Bound Mutate )
 
 **Bound Mutate は、一番オススメの方法です。**
 先ずは、ソースコードを見てみましょう。
@@ -410,7 +382,7 @@ const DisplayCatName = () => {
 `mutate()` の再検証は、オプションや`useSWRImmutable()`で自動再検証機能を無効にしている場合でも発生しますので、注意してください！
 :::
 
-## 方法その２( Refetch Mutation )
+### 方法その２( Refetch Mutation )
 
 Refetch Mutation は、名前が示す通り refetch(再取得) によってデータの整合性を保つ方法です。ソースコードを見てみましょう。
 
@@ -444,7 +416,7 @@ Bound Mutate と違う所は、 `mutate` 関数を `useSWRConfig()` から取得
 ソースコード内のコメントにも書いてありますが、useSWR()の第一引数に配列を渡している場合は、mutate()でも同じ値を持った配列を渡す必要があります。
 :::
 
-## 方法その３( Update Local Mutate )
+### 方法その３( Update Local Mutate )
 
 Update Local Mutate は、Refetch Mutation とほとんど同じような使い方です。
 ソースコードを見てみましょう。
@@ -483,7 +455,7 @@ const DisplayCatName = () => {
 
 ただ注意としては、使いすぎると複雑なバグを引き起こしかねないので、Bound Mutate が使える場合は、そちらを使った方が良いと思います 🤔 ※ Boud Muatate だと範囲を限定できるので、バグを限定的にすることができます。
 
-## 方法その４( Mutate Based on Current Data )
+### 方法その４( Mutate Based on Current Data )
 
 最後に Mutate Based on Current Data を紹介します。
 ソースコードを見てみましょう。
@@ -518,7 +490,7 @@ const DisplayCatName = () => {
 
 ただ、こちらの方法はデータの整合性を保つのが難しい(引数で受け取る値が any)ですし、複雑なロジックが実行できるという事は、それだけバグを発生させやすいという事でもありますので、多用は禁物だと思います 🦉
 
-## Mutation まとめ
+### Mutation まとめ
 
 上記の方法を筆者の知見を交えてまとめたいと思います。
 
@@ -529,7 +501,7 @@ const DisplayCatName = () => {
 | Update Local Mutate          | useSWR を使わなくてもキャッシュを更新できる  | Bound Mutate で代用できることが多い    | 低         |
 | Mutate Based on Current Data | 複雑な処理が可能                             | バグを引き起こしやすい                 | 中         |
 
-# ページネーション( Pagination )
+## ページネーション( Pagination )
 
 次はページネーション機能について見てきたいと思います。
 先ずはサンプルコードを見てみましょう。
@@ -634,15 +606,15 @@ GET '/users?page=0&limit=10'
 
 これでページネーション機能の紹介は終わりです。シンプル過ぎて、特に解説するところもなかったですね 😅
 
-# 自動再検証( Auto Revalidation )
+## 自動再検証( Auto Revalidation )
 
 自動再検証( Auto Revalidation )について解説したいと思います。
 
-SWR と言う名前は、[stale-while-revalidate](https://tools.ietf.org/html/rfc5861) の頭文字から来ていると言いましたが、この [stale-while-revalidate](https://tools.ietf.org/html/rfc5861) にはキャッシュを更新する必要があるのかを**検証する**プロセスがあります。勿論、SWR も [stale-while-revalidate](https://tools.ietf.org/html/rfc5861) を踏まえた設計になっているので、検証をするのですが、SWR では自動で検証するようになっており、その検証タイミングも様々なモノがあります。
+SWR と言う名前は、[stale-while-revalidate](https://tools.ietf.org/html/rfc5861) の頭文字から来ていると言いましたが、この [stale-while-revalidate](https://tools.ietf.org/html/rfc5861) にはキャッシュを更新する必要があるのかを**検証する**プロセスがあります。もちろん、SWR も [stale-while-revalidate](https://tools.ietf.org/html/rfc5861) を踏まえた設計になっているので、検証をするのですが、SWR では自動で検証するようになっており、その検証タイミングも様々なモノがあります。
 
 この節では、どのタイミングで自動再検証が行われているのかを見て行きたいと思います。
 
-## フォーカス時に再検証する( Revalidate on Focus )
+### フォーカス時に再検証する( Revalidate on Focus )
 
 ページがフォーカスした時、タブを切り替えた時、または`focusThrottleInterval`オプションで指定した期間内( ポーリングする時間 )に、SWR は自動的にデータを再検証します。
 
@@ -661,7 +633,7 @@ https://swr.vercel.app/docs/revalidation#revalidate-on-focus
 デフォルトは`5000ms`に設定されています。
 :::
 
-## 秒間隔で再検証する( Revalidate on Interval )
+### 秒間隔で再検証する( Revalidate on Interval )
 
 画面上のデータを時間と共に更新したい時、SWR の `refreshInterval` オプションを設定する事で、それが可能になります。
 
@@ -681,7 +653,7 @@ https://swr.vercel.app/docs/revalidation#revalidate-on-interval
 この機能が有効でも、デフォルトでは Web ページが画面に表示されていない時、またはネットワーク接続がない時は再検証されません。再検証するには、`refreshWhenHidden` または `refreshWhenOffline` オプションを有効にする必要があります。
 :::
 
-## 再接続時に再検証する( Revalidate on Reconnect )
+### 再接続時に再検証する( Revalidate on Reconnect )
 
 ユーザーがオンラインに復帰した時に再検証することも可能です。
 
@@ -705,21 +677,21 @@ useSWR("/api/user", fetcher, { revalidateOnReconnect: true })
 参照: [SWR のソースコードより引用](https://github.com/vercel/swr/blob/e3d42488d7457019f5f9ca3b6e03357c8dd33130/src/utils/web-preset.ts#L4-L10)
 :::
 
-## マウント時に再検証する( Revalidate on Mount )
+### マウント時に再検証する( Revalidate on Mount )
 
 `useSWR()` を実行しているコンポーネントがマウントした時にも、再検証することが可能です。
 
 `revalidateOnMount` オプションを設定する事ができます。
 
 ```ts
-useSWR("/api/user", fetecher, { revalidateOnMount: true });
+useSWR('/api/user', fetecher, { revalidateOnMount: true })
 ```
 
 :::message
 デフォルトでは `fallbackData` オプションが設定されていない場合、**マウント時に再検証が行われます。**
 :::
 
-## 自動再検証を行いたくない場合
+### 自動再検証を行いたくない場合
 
 プロジェクトによっては、上記すべての再検証を行いたくない場合があります。
 そのような場合には、 `useSWRImmutable()` を使うことで、すべての自動再検証を無効にできます 👇
@@ -739,7 +711,7 @@ useSWR(key, fetcher, {
 
 基本的には、`useSWR()`と同じオプションや挙動をするので、`useSWR()`の[糖衣構文](https://ja.wikipedia.org/wiki/糖衣構文)として使えます。
 
-# プリフェッチ(Prefetching)
+## プリフェッチ(Prefetching)
 
 上記で解説した、[Mutation](#mutation) を使う事でデータを予めプリフェッチすることができます。
 
@@ -765,7 +737,7 @@ function prefetch () {
 >
 > JavaScript がダウンロードを開始する前であっても、HTML がロードされるときにデータをプリフェッチします。 同じ URL を使用するすべての着信フェッチ要求は、結果を再利用します（もちろん、SWR を含む）。
 
-## 初期値を設定する
+### 初期値を設定する
 
 SSR や SSG を使用している時などでは、`useSWR()`でリクエストする前に既にデータを取得していることがあります。そのような場合には、`fallbackData`オプションを使うことで、あらかじめ初期値を設定することができます。
 
@@ -788,7 +760,7 @@ useSWR('/api/data', fetcher, { fallbackData: "hoge" })
 </SWRConfig>
 ```
 
-# Dependency Collection について( 重要 )
+## Dependency Collection について( 重要 )
 
 Dependency Collection について解説したいと思いますが、**これは結構重要です。**
 なので、SWR を使う人は是非とも知っておきたい知識となっていますので、気合入れて読んでください 🥋
@@ -865,7 +837,7 @@ return {
 
 この挙動を知らずに、使ってもないのに `error` や `isValidating` を取得してると、**無駄な描画更新が発生してしまうので注意しましょう！**
 
-# Suspence Mode
+## Suspence Mode
 
 :::message alert
 Suspence Mode は現在(2021/01 時点)、React の**実験的な**機能です。これらの API は、React の一部になる前に、警告なしに大幅に変更される可能性があります。
@@ -909,7 +881,7 @@ Suspence Mode では、`useSWR()` が返す `data` は、常に通信結果に�
 </ErrorBoundary>
 ```
 
-## Note:条件付きフェッチを使用する場合
+### Note:条件付きフェッチを使用する場合
 
 通常、`suspence` オプションを有効にすると、レンダリング時に `data` が準備されている事が保証されています。
 
@@ -925,7 +897,7 @@ function Profile () {
 
 この制限に関する技術的な詳細が知りたい方は、こちらの[Discussion](https://github.com/vercel/swr/pull/357#issuecomment-627089889)を参照してください。
 
-# Next.js との連携( SSG/SSR 対応 )
+## Next.js との連携( SSG/SSR 対応 )
 
 Next.js では、SSG と SSR という強力な機能を使うことができます。SWR はそれらの機能と**一緒に使うことができます。**
 
@@ -968,7 +940,7 @@ function Article() {
 useSWR('/api/article', fetcher, { fallbackData: articleValue })
 ```
 
-# Middleware について
+## Middleware について
 
 :::message
 Middleware を多用すると処理が複雑化してバグを発生させやすいため、使用を控えることをオススメします。
@@ -1026,7 +998,7 @@ function Foo() {
 useSWR(key, fetcher, { use: [a, b, c] })
 ```
 
-## 実行順について
+### 実行順について
 
 Middleware の理解を深めるために、実際に Middleware の実行順を確認していきましょう。
 まずは、以下のような処理を書いたとします 👇
@@ -1050,7 +1022,7 @@ exit  a
 上記から分かるように、`a → b → c → useSWR()` の順で実行されています。
 これはつまり、もし `a` の部分にバグがあり処理が中断した場合は、それ以降の `b → c → useSWR()` は実行されないことを意味します。そのため、**Middleware の順番は重要**であり、**Middleware のバグは大きなバグに繋がりやすい**ことを理解しておく必要があります。
 
-## 具体例について
+### 具体例について
 
 一番身近な具体例として、上記で解説した `useSWRInfinite()` が挙げられます 👇
 
@@ -1060,7 +1032,7 @@ https://github.com/vercel/swr/blob/ec778e70c8e17c239f2837c14dea99ce9a429fb0/infi
 
 https://swr.vercel.app/ja/docs/middleware#%E4%BE%8B
 
-# キャッシュについて
+## キャッシュについて
 
 :::message
 **キャッシュを扱う際には注意して扱ってください！**
@@ -1079,7 +1051,7 @@ interface Cache<Data> {
 
 ※ 上記の型を満たすものとして [JavaScript の Map](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Map) などがあります。
 
-## Cache Provider の設定
+### Cache Provider の設定
 
 Cache Provider を設定するには、`<SWRConfig />` を使用します。
 
@@ -1107,7 +1079,7 @@ function App() {
 この機能は実験的なモノであり、将来のアップグレードで動作が変更される可能性がある事に注意してください！
 :::
 
-## Cache Provider の取得
+### Cache Provider の取得
 
 カスタマイズした Cache Provider は、`useSWRConfig()` で取得することができます 👇
 
@@ -1124,13 +1096,13 @@ const Component = () => {
 }
 ```
 
-## 具体的な処理について
+### 具体的な処理について
 
 公式サイトにいくつかの具体例がありますので、そちらを参考にして頂けたらと思います 👇
 
 https://swr.vercel.app/ja/docs/advanced/cache#例
 
-# React Native への対応
+## React Native への対応
 
 SWR は、[React Native](https://reactnative.dev/) でも使用することができます。
 基本的な使い方は同じですが、`focus` や `online` といった**ブラウザ特有のイベントを React Native 用に設定しなおす必要があります**👇
@@ -1196,7 +1168,7 @@ SWR は、[React Native](https://reactnative.dev/) でも使用することが�
 
 上記のソースコードにより、React Native でもアクティブモードへ移行した時に、フォーカス時の再検証( Revalidate on Focus )が実行されるようになります。
 
-# オプションについて
+## オプションについて
 
 `useSWR`にはオプションを渡すことができます。
 
@@ -1208,13 +1180,13 @@ const { data } = useSWR(key, fetcher, optoins);
 
 :::details オプション一覧
 
-## suspense
+### suspense
 
 | 型      | デフォルト値 | 効果                                                                                               |
 | ------- | ------------ | -------------------------------------------------------------------------------------------------- |
 | boolean | false        | [React Suspence モード](https://ja.reactjs.org/docs/concurrent-mode-suspense.html)を有効にします。 |
 
-## fetcher
+### fetcher
 
 | 型        | デフォルト値 | 効果                                  |
 | --------- | ------------ | ------------------------------------- |
@@ -1224,25 +1196,25 @@ const { data } = useSWR(key, fetcher, optoins);
 type Fetcher<Data> = (...args: any) => Data | Promise<Data>
 ```
 
-## fallback
+### fallback
 
 | 型  | デフォルト値 | 効果                                |
 | --- | ------------ | ----------------------------------- |
 | any | undefined    | 初期データの key-value オブジェクト |
 
-## fallbackData
+### fallbackData
 
 | 型  | デフォルト値 | 効果               |
 | --- | ------------ | ------------------ |
 | any | undefined    | 初期値を設定します |
 
-## revalidateIfStale
+### revalidateIfStale
 
 | 型      | デフォルト値 | 効果                                                   |
 | ------- | ------------ | ------------------------------------------------------ |
 | boolean | true         | 古いデータがある場合でも、マウント時に自動再検証をする |
 
-## revalidateOnMount
+### revalidateOnMount
 
 | 型      | デフォルト値 | 効果                                               |
 | ------- | ------------ | -------------------------------------------------- |
@@ -1250,7 +1222,7 @@ type Fetcher<Data> = (...args: any) => Data | Promise<Data>
 
 ※ デフォルトでは `fallbackData` が**設定されてない場合**、マウント時に再検証されます。`false` だと `fallbackData` を設定していても、再検証されません。
 
-## revalidateOnFocus
+### revalidateOnFocus
 
 | 型      | デフォルト値 | 効果                                                 |
 | ------- | ------------ | ---------------------------------------------------- |
@@ -1258,19 +1230,19 @@ type Fetcher<Data> = (...args: any) => Data | Promise<Data>
 
 ※ `focusThrottleInterval` オプションで検証する期間を変更することができます。
 
-## revalidateOnReconnect
+### revalidateOnReconnect
 
 | 型      | デフォルト値 | 効果                                                       |
 | ------- | ------------ | ---------------------------------------------------------- |
 | boolean | true         | ブラウザがネットワーク接続を回復した時に自動的に再検証する |
 
-## refreshInterval
+### refreshInterval
 
 | 型     | デフォルト値 | 効果                                         |
 | ------ | ------------ | -------------------------------------------- |
 | number | 0            | ポーリング間隔のミリ秒（デフォルトでは無効） |
 
-## refreshWhenHidden
+### refreshWhenHidden
 
 | 型      | デフォルト値 | 効果                                                              |
 | ------- | ------------ | ----------------------------------------------------------------- |
@@ -1278,31 +1250,31 @@ type Fetcher<Data> = (...args: any) => Data | Promise<Data>
 
 ※ `refreshInterval` が有効になっている場合にのみ動作します。`true` に設定する時は、**必ず** `refreshInterval` を設定してください。
 
-## refreshWhenOffline
+### refreshWhenOffline
 
 | 型      | デフォルト値 | 効果                                                                |
 | ------- | ------------ | ------------------------------------------------------------------- |
 | boolean | false        | ブラウザがオフラインの時にポーリングする (`navigator.onLine`で判断) |
 
-## refreshWhenOffline
+### refreshWhenOffline
 
 | 型      | デフォルト値 | 効果                                                                |
 | ------- | ------------ | ------------------------------------------------------------------- |
 | boolean | false        | ブラウザがオフラインの時にポーリングする (`navigator.onLine`で判断) |
 
-## shouldRetryOnError
+### shouldRetryOnError
 
 | 型      | デフォルト値 | 効果                                       |
 | ------- | ------------ | ------------------------------------------ |
 | boolean | true         | fetcher にエラーが発生したときに再試行する |
 
-## dedupingInterval
+### dedupingInterval
 
 | 型     | デフォルト値 | 効果                                                 |
 | ------ | ------------ | ---------------------------------------------------- |
 | number | 2000         | この期間内に同じキーでのリクエストの重複を排除します |
 
-## focusThrottleInterval
+### focusThrottleInterval
 
 | 型     | デフォルト値 | 効果                     |
 | ------ | ------------ | ------------------------ |
@@ -1310,7 +1282,7 @@ type Fetcher<Data> = (...args: any) => Data | Promise<Data>
 
 ※ ここでの再検証とは、`revalidateOnFocus`の事を指します。`revalidateOnFocus`オプションが false の場合は、このオプションは機能しません。
 
-## loadingTimeout
+### loadingTimeout
 
 | 型     | デフォルト値 | 効果                                                    |
 | ------ | ------------ | ------------------------------------------------------- |
@@ -1318,7 +1290,7 @@ type Fetcher<Data> = (...args: any) => Data | Promise<Data>
 
 ※ 低速ネットワーク（2G、<= 70Kbps）の場合、`loadingTimeout`は 5 秒になります。
 
-## errorRetryInterval
+### errorRetryInterval
 
 | 型     | デフォルト値 | 効果                             |
 | ------ | ------------ | -------------------------------- |
@@ -1326,7 +1298,7 @@ type Fetcher<Data> = (...args: any) => Data | Promise<Data>
 
 ※ 低速ネットワーク（2G、<= 70Kbps）の場合、`errorRetryInterval`は 10 秒になります。
 
-## errorRetryCount
+### errorRetryCount
 
 | 型     | デフォルト値 | 効果                 |
 | ------ | ------------ | -------------------- |
@@ -1334,7 +1306,7 @@ type Fetcher<Data> = (...args: any) => Data | Promise<Data>
 
 ※ デフォルトでは、[exponential backoff アルゴリズム](https://en.wikipedia.org/wiki/Exponential_backoff)を使用してエラーの再試行を処理します
 
-## onLoadingSlow
+### onLoadingSlow
 
 | 型        | デフォルト値 | 効果                                                           |
 | --------- | ------------ | -------------------------------------------------------------- |
@@ -1345,7 +1317,7 @@ type Fetcher<Data> = (...args: any) => Data | Promise<Data>
 type onLoadingSlow = (key: string, config: SWROptions) => void
 ```
 
-## onSuccess
+### onSuccess
 
 | 型        | デフォルト値 | 効果                                             |
 | --------- | ------------ | ------------------------------------------------ |
@@ -1356,7 +1328,7 @@ type onLoadingSlow = (key: string, config: SWROptions) => void
 type onSuccess = (data: any, key: string, config: SWROptions) => void
 ```
 
-## onError
+### onError
 
 | 型        | デフォルト値 | 効果                                             |
 | --------- | ------------ | ------------------------------------------------ |
@@ -1368,7 +1340,7 @@ type onSuccess = (data: any, key: string, config: SWROptions) => void
 type onError = (error: any, key: string, config: SWROptions) => void
 ```
 
-## onErrorRetry
+### onErrorRetry
 
 | 型        | デフォルト値 | 効果                               |
 | --------- | ------------ | ---------------------------------- |
@@ -1392,7 +1364,7 @@ type RevalidateOptions = {
 }
 ```
 
-## compare
+### compare
 
 | 型        | デフォルト値 | 効果                                                                                                     |
 | --------- | ------------ | -------------------------------------------------------------------------------------------------------- |
@@ -1404,7 +1376,7 @@ type compare = (a: any, b: any) => boolean
 
 ※ デフォルト値では、[dequal](https://github.com/lukeed/dequal)が使われています
 
-## isPaused
+### isPaused
 
 | 型        | デフォルト値 | 効果                                       |
 | --------- | ------------ | ------------------------------------------ |
@@ -1420,7 +1392,7 @@ type isPaused = () => boolean
 
 https://github.com/vercel/swr/pull/845
 
-## use
+### use
 
 | 型        | デフォルト値 | 効果                   |
 | --------- | ------------ | ---------------------- |
@@ -1434,7 +1406,7 @@ type use = Middleware[]
 
 :::
 
-# あとがき
+## あとがき
 
 ここまで[SWR](https://swr.vercel.app/)の基本的な使い方から、詳細な挙動について解説してきました。
 
