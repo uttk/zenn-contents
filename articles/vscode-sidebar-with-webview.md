@@ -8,16 +8,16 @@ published: false
 
 ## どゆこと？
 
-VScode 拡張では、TreeView（サイドバー）をカスタマイズできます。（以下の画像の Ⓑ の部分）
+VSCode 拡張では、サイドバーをカスタマイズできます（以下の画像の Ⓑ の部分）
 
 ![](/images/vscode-side-panel-with-webiew/vscode-sidebar.png)
 *https://code.visualstudio.com/docs/getstarted/userinterface より引用*
 
-通常 TreeView には名前の通り、Tree 構造を表現するための UI ぐらいしか表示できませんが、実は WebView も表示することができます。[^1]
+通常サイドバーにはファイルをツリー表示する TreeView ぐらいしか表示できませんが、実は WebView も表示することができます。[^1]
 
 [^1]: https://code.visualstudio.com/updates/v1_50#_webview-views
 
-しかし、この機能についての公式ドキュメントが皆無で見つけられる情報が[サンプル](https://code.visualstudio.com/api/get-started/your-first-extension)ぐらいしか無いので、この場を借りてサイドバーに WebView を表示する方法を紹介しようかなと思います 🐲
+しかし、この機能についての公式ドキュメントがあんまり無くて、参考になる情報が[公式サンプル](https://github.com/microsoft/vscode-extension-samples/tree/main/webview-view-sample)ぐらいしか無いので、この場を借りてサイドバーに WebView を表示する方法を紹介しようかなと思います 🐲
 
 ## 基本的な実装方法
 
@@ -78,9 +78,7 @@ import * as vscode from "vscode";
 export class WebViewProvider implements vscode.WebviewViewProvider {
   constructor(private extensionUri: vscode.Uri) {}
 
-  public resolveWebviewView(
-    webviewView: vscode.WebviewView,
-  ) {
+  public resolveWebviewView(webviewView: vscode.WebviewView) {
     // WebViewで表示したいHTMLを設定します
     webviewView.webview.html = `
       <!DOCTYPE html>
@@ -113,9 +111,7 @@ import * as vscode from "vscode";
 export class WebViewProvider implements vscode.WebviewViewProvider {
   constructor(private extensionUri: vscode.Uri) {}
 
-  public resolveWebviewView(
-    webviewView: vscode.WebviewView,
-  ) {
+  public resolveWebviewView(webviewView: vscode.WebviewView) {
     webviewView.webview.options = {
       enableScripts: true, // スクリプトを使えるようにする
     };
@@ -156,9 +152,7 @@ import * as vscode from "vscode";
 export class WebViewProvider implements vscode.WebviewViewProvider {
   constructor(private extensionUri: vscode.Uri) {}
 
-  public resolveWebviewView(
-    webviewView: vscode.WebviewView,
-  ) {
+  public resolveWebviewView(webviewView: vscode.WebviewView) {
     webviewView.webview.options = {
       enableScripts: true, // スクリプトを使えるようにする
     };
@@ -209,11 +203,9 @@ import * as vscode from "vscode";
 export class WebViewProvider implements vscode.WebviewViewProvider {
   constructor(private extensionUri: vscode.Uri) {}
 
-  public resolveWebviewView(
-    webviewView: vscode.WebviewView,
-  ) {
+  public resolveWebviewView(webviewView: vscode.WebviewView) {
     // 特に設定するべきオプションは必要ありませんが、
-    // オブジェクトは設定する必要があります
+    // オブジェクトは代入する必要があります
     webviewView.webview.options = {};
 
     // WebView 内で`./public/index.css`を読み込み可能にするためのUri
@@ -227,7 +219,7 @@ export class WebViewProvider implements vscode.WebviewViewProvider {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>ChatGPT</title>
+        <title>WebView Example</title>
 
         <!-- ローカルのCSSファイルを読み込みます -->
         <link rel="stylesheet" href="${styleUri}">
