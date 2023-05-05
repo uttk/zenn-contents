@@ -3,7 +3,7 @@ title: '良い子の諸君！VSCode 拡張のサイドバーは WebView も表�
 emoji: 🌟
 type: 'tech' # tech: 技術記事 / idea: アイデア
 topics: [vscode]
-published: false
+published: true
 ---
 
 ## どゆこと？
@@ -140,7 +140,7 @@ export class WebViewProvider implements vscode.WebviewViewProvider {
 
 上記の `<script />` 内のコードが実行されていれば OK です！
 
-もし、`Blocked script execution in ~` みたいなエラーがコンソールに出ている場合は、`enableScripts` が正しく設定されていないので、ちゃんと `true` に設定してください。
+もし、`Blocked script execution in ~` みたいなエラーがコンソールに出ている場合は、`enableScripts` が正しく設定されていないので、ちゃんと `true` を設定してください。
 
 ## ローカルの JS ファイルを読み込む
 
