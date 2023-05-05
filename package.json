@@ -12,7 +12,7 @@
   "dependencies": {
     "textlint": "^12.1.0",
     "textlint-rule-preset-ja-technical-writing": "^7.0.0",
-    "zenn-cli": "^0.1.137"
+    "zenn-cli": "^0.1.142"
   },
   "packageManager": "pnpm@7.26.3",
   "engines": {
