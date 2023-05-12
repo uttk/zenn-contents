@@ -1,9 +1,9 @@
 ---
-title: "葉桜の季節に君へ React 用ルーティングライブラリ wouter を紹介するということ"
+title: "葉桜の季節に君へルーティングライブラリ wouter を紹介するということ"
 emoji: "🌸"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: [react, preact, wouter]
-published: false
+published: true
 ---
 
 ## この記事について
@@ -11,7 +11,7 @@ published: false
 みなさん、こんにちは。
 最近覚えた言葉は「ペトリコール」、uttk です。
 
-ここ数日、Electron + React の環境を触っていて、その過程で久しぶりに自前でルーティング処理を実装することになり、色々とライブラリを探していると wouter というライブラリがシンプルで使いやすかったので、今回は wouter について少し解説したいと思います。
+ここ数日 Electron + React の環境を触っていて、その過程で久しぶりに自前でルーティング処理を実装することになり、色々とライブラリを探していると wouter というライブラリがシンプルで使いやすかったので、今回は wouter について紹介したいと思います。
 
 :::message
 この記事は上記のリポジトリの README の情報を参考に書いています。
