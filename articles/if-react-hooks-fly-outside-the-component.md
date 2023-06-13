@@ -164,7 +164,7 @@ const root = createRoot(document.getElementById('app'));
 root.render(<App />);
 ```
 
-基本的な実装は `fly()` によってコンポーネントに渡す値を定義しています。もちろんコンポーネントの外なので、[フックのルール](https://ja.legacy.reactjs.org/docs/hooks-rules.html)は適用されないため、if 文なども State 宣言時に使用することができます👇
+基本的な実装は `fly()` によってコンポーネントに渡す Props を定義しています。もちろんコンポーネントの外なので、[フックのルール](https://ja.legacy.reactjs.org/docs/hooks-rules.html)は適用されないため、if 文なども State 宣言時に使用することができます👇
 
 ```tsx:flyではState宣言時にif文なども使える
 const flyCounter = fly(
@@ -190,8 +190,8 @@ const flyAny = fly(
 
 これには二つの理由があります。
 
-一つ目は、**自動的に Props に State を渡すため** です。
-State を受け取るコンポーネントは必然的に Props から `fly()` などで定義した State を受け取るため、もし明示的に渡すようにするとコンポーネントの利便性が落ちてしまいます👇
+一つ目は、**自動的に Props に値を渡すため** です。
+fly で定義した値を受け取るコンポーネントは必然的に Props から受け取るため、もし明示的に渡すようにするとコンポーネントの利便性が落ちてしまいます👇
 
 ```tsx:flyに依存するコンポーネントを使うたびにPropsを指定する必要があり面倒
 function AppComponent() {
@@ -527,9 +527,9 @@ export function AppComponent({ flyFetchData }: AppProps) {
 
 っとまぁ、ここまで在りもしない API について考えてきましたが、ぶっちゃけ実際に使ってないので、ここで色々と考えても鬼が笑うだけっていうね😇
 
-でも、自分では「 良さそう！ 」って思っているので、React を用いた新しいフレームワークを作ってみるのも勉強になるしアリかな～と思っています。~~思っているだけ~~
+でも、自分では「 良さそう！ 」って思っているので、React を使った新しいフレームワークを作ってみるのも勉強になるしアリかな～と思っています。~~思っているだけ~~
 
-また、[packelyze](https://github.com/mizchi/packelyze) や [hono](https://hono.dev/) などを使えば最近話題の各種 Edge ランタイムをターゲットとしたフレームワークは作れそうなので、「どの Edge ランタイムでも動く Next.js！」みたいな思想のフレームワークは個人的に作ってみたいですね。
+一応、[packelyze](https://github.com/mizchi/packelyze) や [hono](https://hono.dev/) などを使えば各種 Edge ランタイムをターゲットとしたフレームワークは作れそうなので、「どの Edge ランタイムでも動く Next.js！」みたいな思想のフレームワークは作ってみてもいいかも？~~知らんけど~~
 
 ここまでくだらない記事を読んで頂いてありがとうございます🙏
 
