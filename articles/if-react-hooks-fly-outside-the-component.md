@@ -232,7 +232,7 @@ fly ではそのようなことが無いように、宣言時にコンポーネ�
 次は fly 同士の連携について考えます。
 React Custom Hooks では、Custom Hooks の中で Custom Hooks を使うことができますが、fly でも同じことをできるようにします👇
 
-```tsx
+```tsx:flyAnyの値をflyCounter内で使う例
 import { fly } from "xxx"
 
 export const flyAny = fly(/*...*/, [ AppComponent ])
