@@ -1,5 +1,5 @@
 ---
-title: "Zenn に段階的に Content Security Policy を導入した話"
+title: "Zenn に Content Security Policy を段階的に導入した話"
 emoji: "🍤"
 type: "tech"
 topics: ["security", "csp", "nextjs"]
