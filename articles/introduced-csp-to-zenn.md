@@ -3,7 +3,7 @@ title: "Zenn に段階的に Content Security Policy を導入した話"
 emoji: "🍤"
 type: "tech"
 topics: ["security", "csp", "nextjs"]
-published: false
+published: true
 publication_name: team_zenn
 ---
 
@@ -525,7 +525,7 @@ class MyDocument extends Document<MyDocumentProps> {
 export default MyDocument;
 ```
 
-## 段階的に導入するには？
+## 段階的に導入するには
 
 ここまで CSP の導入方法について解説してきましたが、これから CSP を導入する場合、上記の設定をいきなり導入するのは流石に難しいと思います。
 
@@ -557,7 +557,7 @@ https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Polic
   }
 ```
 
-実は上記で設定している [report-uri](https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Content-Security-Policy/report-uri) は非推奨なんですが、移行先の [report-to](https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Content-Security-Policy/report-to) が Google Chrome をはじめとしたモダンブラウザで上手く動作しないことがありましたので、泣く泣く[report-uri](https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Content-Security-Policy/report-uri) を使用しています 😥 ( もちろん、いずれは [report-to](https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Content-Security-Policy/report-to) に対応します )
+実は上記で設定している [report-uri](https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Content-Security-Policy/report-uri) は非推奨なんですが、移行先の [report-to](https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Content-Security-Policy/report-to) が Google Chrome をはじめとしたモダンブラウザで上手く動作しないことがありましたので、泣く泣く [report-uri](https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Content-Security-Policy/report-uri) を使用しています 😥 ( もちろん、いずれは [report-to](https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Content-Security-Policy/report-to) に対応します )
 
 そして、正しく設定できていれば以下のような JSON がエンドポイントに送られます 👇
 
@@ -607,6 +607,8 @@ https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Polic
 ### CSP の違反レポートは Cloud Functions で受け取ると便利
 
 Zenn でも `Content-Security-Policy-Report-Only` を使って違反内容を確認しながら段階的に導入しましたが、[report-uri](https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Content-Security-Policy/report-uri) に設定するエンドポイントを Cloud Functions で実装し、違反内容をコンソールログに出力することで Cloud Logging で細かく検索できてとても便利でした。
+
+https://cloud.google.com/functions?hl=ja
 
 https://cloud.google.com/logging?hl=ja
 
