@@ -175,9 +175,20 @@ SSG しているページでは CSP が設定できないという問題点は�
 
 ## Zenn ではどのように導入したか
 
-Zenn では Google Strict が提唱する [Strict CSP アプローチ](https://csp.withgoogle.com/docs/strict-csp.html) になるべく対応するため、基本的には `nonce` + [`strict-dynamic`](https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Content-Security-Policy/script-src#strict-dynamic) で対応するようにし、それが無理な場合はホワイトリスト方式で対応しています。
+Zenn では Google が提唱する [Strict CSP アプローチ](https://csp.withgoogle.com/docs/strict-csp.html) になるべく対応するようにしています。
 
-また、設定するディレクティブは基本的に `script-src` のみ設定しています。本来であれば `style-src` や `font-src` を指定するべきですが、設定しても効果が薄く、またユーザーへの影響範囲が大きいことから設定していません。
+**Strict CSP アプローチの特徴**
+
+- CSP Level 2 みたいに「ドメインをホワイトリストに追加していく」のではなく、すべての `<script />` や `<style />`に nonce 属性を追加し、nonce に対して許可を行う
+- [`strict-dynamic`](https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Content-Security-Policy/script-src#strict-dynamic) を使って、nonce で許可したスクリプトが生成するスクリプトを許可する
+- 基本的にスクリプト (JavaScript) に対してのみ制御を行う ( CSS や画像などは効果が薄いため )
+- CSP Level 3 をサポートしてるブラウザでは CSP を利用した制限をかけるが、サポートしていないブラウザではフォールバックを使って動作を妨げないことを優先する
+
+
+そのため、基本的には `nonce` + [`strict-dynamic`](https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Content-Security-Policy/script-src#strict-dynamic) で対応するようにし、それが無理な場合はホワイトリスト方式で対応しています。
+
+
+また、設定するディレクティブは基本的に `script-src` のみ設定しますが、一部設定した方が良いディレクティブ (後述) があるため、そちらも追加して設定しています。
 
 はい、前置きはこのくらいにして、まずは nonce の基本的な設定を見てきましょう 👉
 
@@ -620,9 +631,13 @@ https://inside.pixiv.blog/kobo/5137
 
 https://csp.withgoogle.com/docs/strict-csp.html
 
+https://web.dev/strict-csp/
+
 https://techblog.yahoo.co.jp/entry/2023071830429434/
 
 https://research.google/pubs/pub45542/
+
+https://laboradian.com/csp-level3-strict-csp/
 
 https://kotamat.com/post/nextjs-strict-csp/
 
