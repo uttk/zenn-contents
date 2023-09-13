@@ -2,8 +2,8 @@
 title: "Axios 使うのやめたらビルドサイズが 10 KB 減って、なんか知らんがパフォーマンスも良くなった話"
 emoji: "⛪"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["javascript", "typescript", "axios"]
-published: false
+topics: ["typescript", "axios"]
+published: true
 publication_name: team_zenn
 ---
 
@@ -23,13 +23,15 @@ https://github.com/axios/axios
 
 まず一番良くなったところといえば、ずばりサイト全体のビルドサイズが 10 KB も減りました。( ちなみに、10 KB は圧縮時のサイズで、圧縮しない場合 100 KB になります 😇 ﾜｰｵ )
 
-![グローバルのビルドサイズが `103.35KB` gzip 時 10.07KB 減った](/images/migrated-from-axios-to-fetch-api/bundle-analysis-ss.png)
+![](/images/migrated-from-axios-to-fetch-api/bundle-analysis-ss.png)
+*グローバルのビルドサイズが `103.35KB` gzip 時 10.07KB 減った*
 
 これは今までのビルドサイズの 30 % になりますので、なかなかの削減に成功したことになります。
 
 また、それに影響してか分かりませんが、フロントエンドサーバーのレイテンシが 40 % ほど良くなりました 👇
 
 ![フロントエンドのレイテンシが 0.13 秒から 0.08 秒に減った](/images/migrated-from-axios-to-fetch-api/paformance-graph-ss.png)
+*フロントエンドのレイテンシが 0.13 秒から 0.08 秒に減った*
 
 そもそも Zenn が速いのでパフォーマンスが良くなったとは言っても、人の感覚では分からないので、ユーザーへの影響はほとんどないですが、この結果はぜんぜん予期していなかったところだったので、個人的にはめっちゃ嬉しい結果でした！また、これにはチームメンバーもニッコリ 👽 ｱｸｼｵｽ ﾏｲ ﾌﾚﾝﾄﾞ
 
