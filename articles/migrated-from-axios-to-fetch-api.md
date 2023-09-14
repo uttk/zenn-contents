@@ -21,6 +21,12 @@ https://github.com/axios/axios
 
 って方が居るかと思いますので、最初に置き換えたことで良くなった部分を紹介しようと思います。
 
+:::message
+結果はあくまで Zenn の環境下での話です。
+Axios から Fetch API に移行したからといって、必ずしもパフォーマンスが向上するわけではありません。
+:::
+
+
 まず一番良くなったところといえば、ずばりサイト全体のビルドサイズが 10 KB も減りました。( ちなみに、10 KB は圧縮時のサイズで、圧縮しない場合 100 KB になります 😇 ﾜｰｵ )
 
 ![](/images/migrated-from-axios-to-fetch-api/bundle-analysis-ss.png)
