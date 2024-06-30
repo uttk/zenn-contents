@@ -2,16 +2,15 @@
   "name": "zenn-articles",
   "version": "1.0.0",
   "description": "zennに投稿する記事や本",
-  "author": "uttk <uttk8128@gmail.com>",
+  "author": "uttk <46495635+uttk@users.noreply.github.com>",
   "license": "MIT",
   "private": true,
   "scripts": {
     "dev": "zenn preview --port 3000"
   },
   "dependencies": {
-    "zenn-cli": "^0.1.142"
+    "zenn-cli": "^0.1.154"
   },
-  "packageManager": "pnpm@7.26.3",
   "engines": {
     "yarn": "use pnpm please!",
     "pnpm": ">=7.26.3"
