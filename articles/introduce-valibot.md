@@ -3,7 +3,7 @@ title: "バリバリ最強No.1な検証ライブラリ Valibot の紹介"
 emoji: "👹"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["valibot"]
-published: false
+published: true
 ---
 
 
