@@ -1002,7 +1002,7 @@ https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Operators/instanc
 
 ## custom
 
-独自の検証をするスキーマを定義するときに使用します。例えば `"hoge"` が文字列の最後にあるか検証するスキーマを作成するには以下のようにします👇
+独自の検証をするスキーマを定義するときに使用します。例えば `"にょ"` が文字列の最後にあるか検証するスキーマを作成するには以下のようにします👇
 
 ```ts
 import * as v from 'valibot';
