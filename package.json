@@ -9,7 +9,7 @@
     "dev": "zenn preview --port 3000"
   },
   "dependencies": {
-    "zenn-cli": "^0.1.154"
+    "zenn-cli": "^0.1.157"
   },
   "engines": {
     "yarn": "use pnpm please!",
