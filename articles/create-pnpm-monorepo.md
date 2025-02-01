@@ -43,10 +43,10 @@ https://zenn.dev/team_zenn/articles/new-monorepo-env
 
 また、環境のバージョン関係は以下のようになります 👇
 
-| name    | version |
-| ------- | ------- |
-| node.js | v18.5.0 |
-| pnpm    | 7.21.0  |
+| name    | version  |
+| ------- | -------- |
+| node.js | v22.13.1 |
+| pnpm    | v10.1.0  |
 
 上記が確認できましたら、最初はルートにある package.json の設定をしていきましょうー 🍏
 
@@ -76,18 +76,16 @@ $> pnpm init
     "keywords": [],
     "author": "",
     "license": "MIT",
-+   "packageManager": "pnpm@7.19.0",
++   "packageManager": "pnpm@10.1.0",
 +   "engines": {
-+     "pnpm": ">=7.19.0"
++     "pnpm": ">=10.1.0"
 +   }
   }
 ```
 
-上記の `"packageManager"` は Node.js v14.19.0 以上に標準搭載されている [Corepack](https://nodejs.org/api/corepack.html) の設定です。この設定をして置くことで、他の人と同じバージョンのパッケージマネージャーを使用することができます。具体的な解説は以下の記事などを参考にすると良いと思います 👇
+`"packageManager"` は後述する turborepo を実行する時に必要な設定です。
 
-https://zenn.dev/teppeis/articles/2021-05-corepack
-
-次に `"engines"` を設定しておくと、想定していないバージョンで実行してしまった時にエラーを出すようにできます。今回は pnpm v7.19.0 以上を指定しています。
+`"engines"` の方は設定しておくと、想定していないバージョンで実行してしまった時にエラーを出すようにできます。今回は pnpm v10.1.0 以上を指定しています。
 
 一応、以下のように `"npm"` や` "yarn"` などに `"use pnpm please!"` のような値を設定しておくと、間違って yarn や npm を実行できないようにできます 👇
 
@@ -95,7 +93,7 @@ https://zenn.dev/teppeis/articles/2021-05-corepack
   "engines": {
 +   "npm": "use pnpm please!",
 +   "yarn": "use pnpm please!",
-    "pnpm": ">=7.19.0"
+    "pnpm": ">=10.1.0"
   }
 ```
 
@@ -146,17 +144,22 @@ export const message = 'HELLO WORLD!'
 
 ```diff json:./packages/lib-a/package.json
   {
-    "name": "lib-a",
++   "name": "@uttk/lib-a",
     "version": "1.0.0",
 +   "main": "./dist/index.js",
 +   "scripts": {
-+     "build": "tsc ./src/index.ts --outDir ./dist --declaration",
++     "build": "tsc ./src/index.ts --outDir ./dist --declaration"
 +   },
     "devDependencies": {
-      "typescript": "^4.9.4"
+      "typescript": "^5.7.3"
     }
   }
 ```
+
+:::message
+パッケージ名は間違って変なパッケージをインストールしないように `@uttk` をプレフィックスで付けています。
+:::
+
 
 ここまで記述できたら、以下のコマンドを実行してビルドファイルが正しく出力されていれば OK👌 です。
 
@@ -164,11 +167,11 @@ export const message = 'HELLO WORLD!'
 $> cd ./packages/lib-a
 $> pnpm build
 
-> lib-a@1.0.0 build /monorepo-example/packages/lib-a
+> @uttk/lib-a@1.0.0 build /monorepo-example/packages/lib-a
 > tsc ./src/index.ts --outDir ./dist --declaration
 
 # ルートに居る状態で以下のコマンド実行しても同じように出来ます
-# $> pnpm --filter lib-a build
+# $> pnpm --filter @uttk/lib-a build
 ```
 
 これで lib-a パッケージの実装は完了です。
@@ -194,28 +197,27 @@ $> pnpm add -D typescript
 
 ```shell:lib-b に lib-a をインストールする
 $> cd ./packages/lib-b
-$> pnpm add lib-a
+$> pnpm add @uttk/lib-a@workspace:*
 
 # ルートに居る状態で以下のコマンド実行しても同じように出来ます
-# $> pnpm --filter lib-b add lib-a
+# $> pnpm --filter lib-b add @uttk/lib-a@workspace:*
 ```
 
 上記のコマンドが成功したら、次は package.json を以下のように修正します 👇
 
 ```diff json:./packages/lib-b/package.json
   {
-    "name": "lib-b",
++   "name": "@uttk/lib-b",
     "version": "1.0.0",
 +   "main": "./dist/index.js",
 +   "scripts": {
-+      "build": "tsc ./src/index.ts --outDir ./dist --declaration",
++      "build": "tsc ./src/index.ts --outDir ./dist --declaration"
 +    },
     "devDependencies": {
-      "typescript": "^4.9.4"
+      "typescript": "^5.7.3"
     },
     "dependencies": {
--     "lib-a": "workspace:^1.0.0"
-+     "lib-a": "workspace:*"
+      "@uttk/lib-a": "workspace:*"
     }
   }
 ```
@@ -225,9 +227,9 @@ $> pnpm add lib-a
 次に `src/index.ts` を以下のように実装します 👇
 
 ```ts:./packages/lib-b/src/index.ts
-import { messaage } from "lib-a";
+import { message } from "@uttk/lib-a";
 
-console.log(`${messaage} from lib-b`)
+console.log(`${message} from lib-b`)
 ```
 
 ここまで実装できたら、build タスクを実行して正しくビルドできたら OK👌 です。
@@ -236,11 +238,11 @@ console.log(`${messaage} from lib-b`)
 $> cd ./packages/lib-b
 $> pnpm build
 
-> lib-a@1.0.0 build /monorepo-example/packages/lib-a
+> @uttk/lib-b@1.0.0 build /monorepo-example/packages/lib-a
 > tsc ./src/index.ts --outDir ./dist --declaration
 
 # ルートに居る状態で以下のコマンド実行しても同じように出来ます
-# $> pnpm --filter lib-b build
+# $> pnpm --filter @uttk/lib-b build
 ```
 
 ビルドが成功したら、ビルドファイルを実行してみてテキストが正しく表示されていれば lib-b の完成です！
@@ -274,11 +276,11 @@ $> pnpm add -w -D turbo
 ```json:./turbo.json
 {
   "$schema": "https://turbo.build/schema.json",
-  "pipeline": {
+  "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
-    },
+    }
   }
 }
 ```
@@ -310,12 +312,12 @@ $> pnpm build
 • Remote caching disabled
 lib-a:build: cache miss, executing 5107e54a8a529999
 lib-a:build:
-lib-a:build: > lib-a@1.0.0 build /monorepo-example/packages/lib-a
+lib-a:build: > @uttk/lib-a@1.0.0 build /monorepo-example/packages/lib-a
 lib-a:build: > tsc ./src/index.ts --outDir ./dist --declaration
 lib-a:build:
-lib-b:build: cache miss, executing 87efad3afd8b858c
+lib-b:build: cache miss, executing 87efcd3afd8b858c
 lib-b:build:
-lib-b:build: > lib-b@1.0.0 build /monorepo-example/packages/lib-b
+lib-b:build: > @uttk/lib-b@1.0.0 build /monorepo-example/packages/lib-b
 lib-b:build: > tsc ./src/index.ts --outDir ./dist --declaration
 lib-b:build:
 
