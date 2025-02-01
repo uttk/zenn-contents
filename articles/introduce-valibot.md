@@ -390,7 +390,7 @@ v.boolean() // 論理値のスキーマ
 ```
 
 :::message
-`v.boolean()` にも [v.value()](https://valibot.dev/api/value/) などのバリデーションを設定できますが、取る値が `true` か `false` しかないので、もしどちらかを一方を検証したいなら [`v.literal()`](#comment-4845c6bbce0408) を使用した方が良いと思います。
+`v.boolean()` にも [v.value()](https://valibot.dev/api/value/) などのバリデーションを設定できますが、取る値が `true` か `false` しかないので、もしどちらかを一方を検証したいなら `v.literal()` を使用した方が良いと思います。
 :::
 
 
