@@ -197,10 +197,10 @@ $> pnpm add -D typescript
 
 ```shell:lib-b に lib-a をインストールする
 $> cd ./packages/lib-b
-$> pnpm add @uttk/lib-a@workspace:*
+$> pnpm add '@uttk/lib-a@workspace:*'
 
 # ルートに居る状態で以下のコマンド実行しても同じように出来ます
-# $> pnpm --filter lib-b add @uttk/lib-a@workspace:*
+# $> pnpm --filter lib-b add '@uttk/lib-a@workspace:*'
 ```
 
 上記のコマンドが成功したら、次は package.json を以下のように修正します 👇
